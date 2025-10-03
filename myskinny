@@ -1,0 +1,2345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MySkinny - AI-Powered Skin Analysis</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            box-sizing: border-box;
+        }
+        
+        .language-selector {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .floating-animation {
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        .pulse-glow {
+            animation: pulse-glow 2s infinite;
+        }
+        
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 20px rgba(102, 126, 234, 0.5); }
+            50% { box-shadow: 0 0 30px rgba(102, 126, 234, 0.8); }
+        }
+        
+        .page {
+            display: none;
+            min-height: 100vh;
+        }
+        
+        .page.active {
+            display: block;
+        }
+        
+        .nav-link.active {
+            color: #7c3aed !important;
+            font-weight: 600;
+        }
+        
+        .chatbot-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+        
+        .routine-timeline {
+            position: relative;
+        }
+        
+        .routine-timeline::before {
+            content: '';
+            position: absolute;
+            left: 20px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(to bottom, #667eea, #764ba2);
+        }
+        
+        .timeline-item {
+            position: relative;
+            padding-left: 60px;
+            margin-bottom: 30px;
+        }
+        
+        .timeline-dot {
+            position: absolute;
+            left: 11px;
+            top: 8px;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #667eea;
+            border: 3px solid white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .camera-permission-guide {
+            background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+            border: 2px dashed #9ca3af;
+        }
+
+        .permission-step {
+            transition: all 0.3s ease;
+        }
+
+        .permission-step.completed {
+            background: #dcfce7;
+            border-color: #16a34a;
+        }
+
+        .stats-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            border: 1px solid #e2e8f0;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .stats-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Language Selection Screen -->
+    <div id="languageSelector" class="language-selector hidden">
+        <div class="bg-white p-12 rounded-3xl shadow-2xl max-w-md w-full mx-4 text-center">
+            <div class="mb-8">
+                <div class="text-6xl mb-4">🌍</div>
+                <h2 class="text-3xl font-bold text-gray-900 mb-2">Choose Your Language</h2>
+                <p class="text-gray-600">Select your preferred language to continue</p>
+            </div>
+            
+            <div class="space-y-3">
+                <button onclick="setLanguage('en')" class="w-full bg-purple-600 text-white py-4 px-6 rounded-xl hover:bg-purple-700 transition duration-300 flex items-center justify-between">
+                    <span class="text-2xl">🇺🇸</span>
+                    <span class="font-semibold">English</span>
+                    <span class="opacity-0">🇺🇸</span>
+                </button>
+                <button onclick="setLanguage('hi')" class="w-full bg-gray-100 text-gray-800 py-4 px-6 rounded-xl hover:bg-gray-200 transition duration-300 flex items-center justify-between">
+                    <span class="text-2xl">🇮🇳</span>
+                    <span class="font-semibold">हिंदी</span>
+                    <span class="opacity-0">🇮🇳</span>
+                </button>
+                <button onclick="setLanguage('ta')" class="w-full bg-gray-100 text-gray-800 py-4 px-6 rounded-xl hover:bg-gray-200 transition duration-300 flex items-center justify-between">
+                    <span class="text-2xl">🇮🇳</span>
+                    <span class="font-semibold">தமிழ்</span>
+                    <span class="opacity-0">🇮🇳</span>
+                </button>
+                <button onclick="setLanguage('te')" class="w-full bg-gray-100 text-gray-800 py-4 px-6 rounded-xl hover:bg-gray-200 transition duration-300 flex items-center justify-between">
+                    <span class="text-2xl">🇮🇳</span>
+                    <span class="font-semibold">తెలుగు</span>
+                    <span class="opacity-0">🇮🇳</span>
+                </button>
+            </div>
+            
+            <div class="mt-6">
+                <button onclick="hideLanguageSelector()" class="text-gray-500 hover:text-gray-700 text-sm">
+                    ✕ Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <div class="flex items-center space-x-3">
+                        <!-- Professional Logo -->
+                        <div class="relative">
+                            <svg width="40" height="40" viewBox="0 0 40 40" class="drop-shadow-lg">
+                                <defs>
+                                    <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" style="stop-color:#667eea"/>
+                                        <stop offset="100%" style="stop-color:#764ba2"/>
+                                    </linearGradient>
+                                </defs>
+                                <!-- Outer circle -->
+                                <circle cx="20" cy="20" r="18" fill="url(#logoGradient)" stroke="white" stroke-width="2"/>
+                                <!-- Inner design representing skin analysis -->
+                                <circle cx="20" cy="20" r="12" fill="rgba(255,255,255,0.2)"/>
+                                <circle cx="20" cy="20" r="8" fill="rgba(255,255,255,0.3)"/>
+                                <circle cx="20" cy="20" r="4" fill="white"/>
+                                <!-- Scanning lines -->
+                                <path d="M8 20 L32 20" stroke="white" stroke-width="1" opacity="0.6"/>
+                                <path d="M20 8 L20 32" stroke="white" stroke-width="1" opacity="0.6"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="text-2xl font-bold gradient-bg bg-clip-text text-transparent">MySkinny</div>
+                            <div class="text-xs text-gray-500 -mt-1">by Gayathri</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Search Bar -->
+                <div class="flex-1 max-w-lg mx-8">
+                    <div class="relative">
+                        <input type="text" id="searchInput" placeholder="Search skincare tips, products..." 
+                               class="w-full px-4 py-2 pl-10 pr-4 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center">
+                            <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Navigation Links -->
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="#" onclick="showPage('home')" class="nav-link text-purple-600 px-3 py-2 rounded-md text-sm font-medium">Home</a>
+                        <a href="#" onclick="showPage('about')" class="nav-link text-gray-700 hover:text-purple-600 px-3 py-2 rounded-md text-sm font-medium">About</a>
+                        <a href="#" onclick="showPage('services')" class="nav-link text-gray-700 hover:text-purple-600 px-3 py-2 rounded-md text-sm font-medium">Services</a>
+                        <a href="#" onclick="showPage('analysis')" class="nav-link text-gray-700 hover:text-purple-600 px-3 py-2 rounded-md text-sm font-medium">Analysis</a>
+                        <button onclick="showLanguageSelector()" class="text-gray-700 hover:text-purple-600 px-3 py-2 rounded-md text-sm font-medium">🌍 Language</button>
+                        <button onclick="showPage('analysis')" class="bg-purple-600 text-white px-4 py-2 rounded-full hover:bg-purple-700 transition duration-300">Start Analysis</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Home Page -->
+    <div id="homePage" class="page active">
+        <!-- Hero Section -->
+        <section class="relative min-h-screen overflow-hidden">
+            <!-- Beautiful gradient background -->
+            <div class="absolute inset-0 bg-gradient-to-br from-emerald-100 via-teal-50 to-cyan-100"></div>
+            <div class="absolute inset-0 bg-gradient-to-tr from-emerald-200/30 via-transparent to-teal-200/30"></div>
+            
+            <!-- Floating decorative elements -->
+            <div class="absolute top-20 left-10 opacity-20">
+                <div class="w-32 h-32 bg-gradient-to-br from-pink-300 to-purple-400 rounded-full blur-xl floating-animation"></div>
+            </div>
+            <div class="absolute bottom-20 right-20 opacity-20">
+                <div class="w-40 h-40 bg-gradient-to-br from-cyan-300 to-blue-400 rounded-full blur-xl floating-animation" style="animation-delay: 2s"></div>
+            </div>
+            <div class="absolute top-1/2 right-1/4 opacity-10">
+                <div class="w-24 h-24 bg-gradient-to-br from-yellow-300 to-orange-400 rounded-full blur-lg floating-animation" style="animation-delay: 1s"></div>
+            </div>
+            
+            <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 min-h-screen flex items-center">
+                <div class="grid lg:grid-cols-2 gap-16 items-center w-full">
+                    <!-- Left Content -->
+                    <div class="text-gray-800">
+                        <div class="mb-8">
+                            <div class="inline-flex items-center bg-gradient-to-r from-purple-100 to-pink-100 border border-purple-200 px-6 py-3 rounded-full mb-8 shadow-lg">
+                                <span class="text-purple-700 font-semibold">✨ Welcome to MySkinny - Your AI Skin Expert</span>
+                            </div>
+                            <h1 class="text-6xl lg:text-8xl font-bold mb-8 leading-tight">
+                                <span class="bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 bg-clip-text text-transparent">
+                                    Transform
+                                </span>
+                                <br>
+                                <span class="text-gray-800">Your Skin</span>
+                                <br>
+                                <span class="bg-gradient-to-r from-rose-500 via-purple-500 to-indigo-500 bg-clip-text text-transparent">
+                                    Journey
+                                </span>
+                            </h1>
+                            <p class="text-2xl lg:text-3xl mb-10 text-gray-700 leading-relaxed font-light">
+                                Discover your skin's true potential with AI-powered analysis. 
+                                <span class="font-semibold text-purple-600">Detect dark spots, acne, hydration levels</span> 
+                                and get personalized skincare solutions in seconds.
+                            </p>
+                        </div>
+                        
+                        <!-- Enhanced Key Benefits -->
+                        <div class="space-y-6 mb-12">
+                            <div class="flex items-center space-x-4 bg-white/60 backdrop-blur-sm p-4 rounded-2xl shadow-lg">
+                                <div class="bg-gradient-to-r from-green-400 to-emerald-500 rounded-full p-3 shadow-lg">
+                                    <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <span class="text-xl font-semibold text-gray-800">Instant AI-powered skin analysis</span>
+                                    <p class="text-gray-600">Advanced computer vision technology</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-4 bg-white/60 backdrop-blur-sm p-4 rounded-2xl shadow-lg">
+                                <div class="bg-gradient-to-r from-blue-400 to-cyan-500 rounded-full p-3 shadow-lg">
+                                    <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <span class="text-xl font-semibold text-gray-800">Detect dark spots & pigmentation</span>
+                                    <p class="text-gray-600">Professional-grade skin concern identification</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-4 bg-white/60 backdrop-blur-sm p-4 rounded-2xl shadow-lg">
+                                <div class="bg-gradient-to-r from-purple-400 to-pink-500 rounded-full p-3 shadow-lg">
+                                    <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <span class="text-xl font-semibold text-gray-800">100% privacy-protected analysis</span>
+                                    <p class="text-gray-600">Your data never leaves your device</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Enhanced CTA Buttons -->
+                        <div class="flex flex-col sm:flex-row gap-6">
+                            <button onclick="showPage('analysis')" class="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-10 py-5 rounded-2xl text-xl font-bold hover:from-purple-700 hover:to-pink-700 transition duration-300 pulse-glow shadow-2xl transform hover:scale-105">
+                                🚀 Start Free Analysis Now
+                            </button>
+                            <button onclick="showInstructions()" class="border-3 border-purple-600 text-purple-600 px-10 py-5 rounded-2xl text-xl font-bold hover:bg-purple-600 hover:text-white transition duration-300 shadow-xl">
+                                📖 See How It Works
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Right Visual - Skin Analysis Demo -->
+                    <div class="relative">
+                        <!-- Main Analysis Display -->
+                        <div class="bg-white/80 backdrop-blur-lg rounded-3xl p-8 shadow-2xl border border-white/50">
+                            <div class="text-center mb-6">
+                                <div class="text-3xl mb-3">🔬</div>
+                                <h3 class="text-2xl font-bold text-gray-900 mb-2">Live Skin Analysis Demo</h3>
+                                <p class="text-gray-600">See how MySkinny analyzes your skin in real-time</p>
+                            </div>
+                            
+                            <!-- Face Analysis Visualization -->
+                            <div class="relative bg-gradient-to-br from-pink-50 to-purple-50 rounded-2xl p-6 mb-6">
+                                <!-- Close-up face with skin analysis -->
+                                <svg width="280" height="320" viewBox="0 0 280 320" class="mx-auto">
+                                    <defs>
+                                        <radialGradient id="skinTone" cx="50%" cy="40%" r="60%">
+                                            <stop offset="0%" style="stop-color:#F4C2A1"/>
+                                            <stop offset="70%" style="stop-color:#E8A87C"/>
+                                            <stop offset="100%" style="stop-color:#D4956B"/>
+                                        </radialGradient>
+                                        <filter id="blur" x="-50%" y="-50%" width="200%" height="200%">
+                                            <feGaussianBlur in="SourceGraphic" stdDeviation="1"/>
+                                        </filter>
+                                    </defs>
+                                    
+                                    <!-- Face outline -->
+                                    <ellipse cx="140" cy="180" rx="90" ry="120" fill="url(#skinTone)" stroke="#D4956B" stroke-width="2"/>
+                                    
+                                    <!-- Forehead -->
+                                    <ellipse cx="140" cy="120" rx="75" ry="40" fill="url(#skinTone)"/>
+                                    
+                                    <!-- Cheeks -->
+                                    <ellipse cx="110" cy="170" rx="35" ry="45" fill="#E8A87C"/>
+                                    <ellipse cx="170" cy="170" rx="35" ry="45" fill="#E8A87C"/>
+                                    
+                                    <!-- Dark spots and pigmentation -->
+                                    <circle cx="125" cy="155" r="3" fill="#8B4513" opacity="0.6"/>
+                                    <circle cx="135" cy="165" r="2" fill="#A0522D" opacity="0.5"/>
+                                    <circle cx="155" cy="160" r="2.5" fill="#8B4513" opacity="0.7"/>
+                                    <circle cx="165" cy="175" r="2" fill="#A0522D" opacity="0.6"/>
+                                    <circle cx="115" cy="180" r="1.5" fill="#8B4513" opacity="0.5"/>
+                                    
+                                    <!-- Acne spots -->
+                                    <circle cx="145" cy="185" r="4" fill="#CD5C5C" opacity="0.8"/>
+                                    <circle cx="130" cy="190" r="3" fill="#DC143C" opacity="0.7"/>
+                                    <circle cx="160" cy="195" r="2.5" fill="#CD5C5C" opacity="0.6"/>
+                                    
+                                    <!-- Analysis overlay points -->
+                                    <circle cx="125" cy="155" r="8" fill="none" stroke="#FF6B6B" stroke-width="2" opacity="0.8">
+                                        <animate attributeName="r" values="8;12;8" dur="2s" repeatCount="indefinite"/>
+                                    </circle>
+                                    <circle cx="145" cy="185" r="10" fill="none" stroke="#FF4757" stroke-width="2" opacity="0.8">
+                                        <animate attributeName="r" values="10;14;10" dur="2.5s" repeatCount="indefinite"/>
+                                    </circle>
+                                    <circle cx="155" cy="160" r="6" fill="none" stroke="#FFA502" stroke-width="2" opacity="0.8">
+                                        <animate attributeName="r" values="6;10;6" dur="1.8s" repeatCount="indefinite"/>
+                                    </circle>
+                                    
+                                    <!-- Hydration analysis zones -->
+                                    <rect x="80" y="140" width="40" height="30" fill="none" stroke="#3742FA" stroke-width="2" opacity="0.6" rx="5">
+                                        <animate attributeName="opacity" values="0.6;1;0.6" dur="3s" repeatCount="indefinite"/>
+                                    </rect>
+                                    <rect x="160" y="140" width="40" height="30" fill="none" stroke="#3742FA" stroke-width="2" opacity="0.6" rx="5">
+                                        <animate attributeName="opacity" values="0.6;1;0.6" dur="3s" repeatCount="indefinite" begin="1s"/>
+                                    </rect>
+                                    
+                                    <!-- Scanning line effect -->
+                                    <line x1="60" y1="100" x2="220" y2="100" stroke="#00D2D3" stroke-width="2" opacity="0.8">
+                                        <animateTransform attributeName="transform" type="translate" values="0,0;0,200;0,0" dur="4s" repeatCount="indefinite"/>
+                                    </line>
+                                </svg>
+                                
+                                <!-- Analysis Labels -->
+                                <div class="absolute top-4 left-4 bg-red-500 text-white px-3 py-1 rounded-full text-xs font-bold">
+                                    Dark Spots Detected
+                                </div>
+                                <div class="absolute top-4 right-4 bg-orange-500 text-white px-3 py-1 rounded-full text-xs font-bold">
+                                    Acne Analysis
+                                </div>
+                                <div class="absolute bottom-4 left-4 bg-blue-500 text-white px-3 py-1 rounded-full text-xs font-bold">
+                                    Hydration: 65%
+                                </div>
+                                <div class="absolute bottom-4 right-4 bg-purple-500 text-white px-3 py-1 rounded-full text-xs font-bold">
+                                    Pigmentation Map
+                                </div>
+                            </div>
+                            
+                            <!-- Analysis Results -->
+                            <div class="grid grid-cols-2 gap-4 mb-6">
+                                <div class="bg-gradient-to-br from-red-50 to-orange-50 p-4 rounded-xl border border-red-200">
+                                    <div class="text-red-600 text-2xl mb-2">🎯</div>
+                                    <h4 class="font-bold text-gray-900 text-sm">Dark Spots</h4>
+                                    <p class="text-xs text-gray-600">5 spots detected</p>
+                                </div>
+                                <div class="bg-gradient-to-br from-blue-50 to-cyan-50 p-4 rounded-xl border border-blue-200">
+                                    <div class="text-blue-600 text-2xl mb-2">💧</div>
+                                    <h4 class="font-bold text-gray-900 text-sm">Hydration</h4>
+                                    <p class="text-xs text-gray-600">65% - Needs boost</p>
+                                </div>
+                                <div class="bg-gradient-to-br from-orange-50 to-red-50 p-4 rounded-xl border border-orange-200">
+                                    <div class="text-orange-600 text-2xl mb-2">🔴</div>
+                                    <h4 class="font-bold text-gray-900 text-sm">Acne</h4>
+                                    <p class="text-xs text-gray-600">3 active spots</p>
+                                </div>
+                                <div class="bg-gradient-to-br from-purple-50 to-pink-50 p-4 rounded-xl border border-purple-200">
+                                    <div class="text-purple-600 text-2xl mb-2">🎨</div>
+                                    <h4 class="font-bold text-gray-900 text-sm">Pigmentation</h4>
+                                    <p class="text-xs text-gray-600">Uneven tone</p>
+                                </div>
+                            </div>
+                            
+                            <button onclick="showPage('analysis')" class="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white py-4 rounded-xl font-bold hover:from-purple-600 hover:to-pink-600 transition duration-300 shadow-lg">
+                                Try Your Own Analysis!
+                            </button>
+                        </div>
+                        
+                        <!-- Floating accuracy badges -->
+                        <div class="absolute -top-6 -right-6 bg-gradient-to-r from-yellow-400 to-orange-400 text-white px-6 py-3 rounded-2xl text-sm font-bold floating-animation shadow-xl">
+                            99.2% Accurate
+                        </div>
+                        <div class="absolute -bottom-6 -left-6 bg-gradient-to-r from-green-400 to-emerald-400 text-white px-6 py-3 rounded-2xl text-sm font-bold floating-animation shadow-xl" style="animation-delay: 1s">
+                            2.3s Analysis
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Stats Section -->
+        <section class="py-20 bg-white">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-16">
+                    <h2 class="text-4xl font-bold text-gray-900 mb-4">Trusted by Thousands</h2>
+                    <p class="text-xl text-gray-600">Join the skincare revolution with MySkinny</p>
+                </div>
+                
+                <div class="grid md:grid-cols-4 gap-8">
+                    <div class="stats-card p-8 rounded-2xl text-center">
+                        <div class="text-4xl font-bold text-purple-600 mb-2">50K+</div>
+                        <div class="text-gray-600">Skin Analyses</div>
+                    </div>
+                    <div class="stats-card p-8 rounded-2xl text-center">
+                        <div class="text-4xl font-bold text-purple-600 mb-2">99.2%</div>
+                        <div class="text-gray-600">Accuracy Rate</div>
+                    </div>
+                    <div class="stats-card p-8 rounded-2xl text-center">
+                        <div class="text-4xl font-bold text-purple-600 mb-2">2.3s</div>
+                        <div class="text-gray-600">Analysis Time</div>
+                    </div>
+                    <div class="stats-card p-8 rounded-2xl text-center">
+                        <div class="text-4xl font-bold text-purple-600 mb-2">4.9★</div>
+                        <div class="text-gray-600">User Rating</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- About Page -->
+    <div id="aboutPage" class="page">
+        <section class="py-20 bg-white min-h-screen">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-16">
+                    <h1 class="text-5xl font-bold text-gray-900 mb-6">About MySkinny</h1>
+                    <p class="text-xl text-gray-600 max-w-3xl mx-auto">Leading the future of personalized skincare through artificial intelligence and advanced computer vision technology</p>
+                </div>
+                
+                <div class="grid md:grid-cols-2 gap-16 items-center mb-20">
+                    <div>
+                        <h2 class="text-3xl font-bold text-gray-900 mb-6">Our Mission</h2>
+                        <p class="text-lg text-gray-600 mb-6">
+                            At MySkinny, we believe everyone deserves personalized skincare solutions. Our AI-powered platform democratizes access to professional-grade skin analysis, making expert skincare advice available to everyone, anywhere.
+                        </p>
+                        <p class="text-lg text-gray-600 mb-8">
+                            Founded by dermatologists and AI researchers, we combine clinical expertise with cutting-edge technology to deliver accurate, actionable skincare insights.
+                        </p>
+                        
+                        <div class="space-y-4">
+                            <div class="flex items-center">
+                                <div class="bg-purple-100 p-2 rounded-lg mr-4">
+                                    <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-gray-900">Clinically Validated</h4>
+                                    <p class="text-gray-600">Tested and approved by dermatologists worldwide</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center">
+                                <div class="bg-purple-100 p-2 rounded-lg mr-4">
+                                    <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-gray-900">Privacy First</h4>
+                                    <p class="text-gray-600">Your data is encrypted and never shared with third parties</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center">
+                                <div class="bg-purple-100 p-2 rounded-lg mr-4">
+                                    <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-gray-900">Instant Results</h4>
+                                    <p class="text-gray-600">Get comprehensive analysis in under 3 seconds</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-gradient-to-br from-purple-100 to-blue-100 p-8 rounded-2xl">
+                        <div class="text-center">
+                            <div class="text-6xl mb-6">🧬</div>
+                            <h3 class="text-2xl font-bold text-gray-900 mb-4">Advanced Technology</h3>
+                            <p class="text-gray-600 mb-6">Our proprietary AI analyzes over 50 skin parameters using deep learning models trained on millions of clinical images</p>
+                            
+                            <div class="grid grid-cols-2 gap-4 text-sm">
+                                <div class="bg-white p-4 rounded-lg">
+                                    <div class="font-bold text-purple-600 text-lg">2M+</div>
+                                    <div class="text-gray-600">Training Images</div>
+                                </div>
+                                <div class="bg-white p-4 rounded-lg">
+                                    <div class="font-bold text-purple-600 text-lg">50+</div>
+                                    <div class="text-gray-600">Skin Parameters</div>
+                                </div>
+                                <div class="bg-white p-4 rounded-lg">
+                                    <div class="font-bold text-purple-600 text-lg">15+</div>
+                                    <div class="text-gray-600">Skin Conditions</div>
+                                </div>
+                                <div class="bg-white p-4 rounded-lg">
+                                    <div class="font-bold text-purple-600 text-lg">24/7</div>
+                                    <div class="text-gray-600">Availability</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Team Section -->
+                <div class="text-center mb-16">
+                    <h2 class="text-3xl font-bold text-gray-900 mb-4">Our Expert Team</h2>
+                    <p class="text-xl text-gray-600">Leading dermatologists and AI researchers</p>
+                </div>
+                
+                <div class="grid md:grid-cols-3 gap-8">
+                    <div class="text-center">
+                        <div class="w-32 h-32 bg-gradient-to-br from-purple-400 to-blue-500 rounded-full mx-auto mb-4 flex items-center justify-center text-white text-4xl font-bold">
+                            DS
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">Dr. Sarah Chen</h3>
+                        <p class="text-purple-600 mb-2">Chief Dermatologist</p>
+                        <p class="text-gray-600 text-sm">15+ years in clinical dermatology, Harvard Medical School</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="w-32 h-32 bg-gradient-to-br from-green-400 to-teal-500 rounded-full mx-auto mb-4 flex items-center justify-center text-white text-4xl font-bold">
+                            MR
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">Dr. Michael Rodriguez</h3>
+                        <p class="text-purple-600 mb-2">AI Research Director</p>
+                        <p class="text-gray-600 text-sm">PhD Computer Vision, Former Google AI researcher</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="w-32 h-32 bg-gradient-to-br from-pink-400 to-red-500 rounded-full mx-auto mb-4 flex items-center justify-center text-white text-4xl font-bold">
+                            EK
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">Dr. Emily Kim</h3>
+                        <p class="text-purple-600 mb-2">Product Innovation Lead</p>
+                        <p class="text-gray-600 text-sm">Cosmetic chemistry expert, 20+ patents in skincare</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Services Page -->
+    <div id="servicesPage" class="page">
+        <section class="py-20 bg-gray-50 min-h-screen">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-16">
+                    <h1 class="text-5xl font-bold text-gray-900 mb-6">Our Services</h1>
+                    <p class="text-xl text-gray-600">Comprehensive AI-powered skincare solutions for every need</p>
+                </div>
+                
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+                    <div class="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition duration-300">
+                        <div class="text-4xl mb-4">📹</div>
+                        <h3 class="text-xl font-bold text-gray-900 mb-3">Live Camera Analysis</h3>
+                        <p class="text-gray-600 mb-4">Real-time skin assessment using your device's camera with guided positioning and quality control</p>
+                        <ul class="text-sm text-gray-500 mb-6 space-y-1">
+                            <li>• Face detection and positioning guide</li>
+                            <li>• Real-time quality assessment</li>
+                            <li>• Instant feedback and results</li>
+                            <li>• Privacy-focused processing</li>
+                        </ul>
+                        <button onclick="showPage('analysis')" class="text-purple-600 font-semibold hover:text-purple-700">Try Live Analysis →</button>
+                    </div>
+                    
+                    <div class="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition duration-300">
+                        <div class="text-4xl mb-4">📸</div>
+                        <h3 class="text-xl font-bold text-gray-900 mb-3">Photo Upload Analysis</h3>
+                        <p class="text-gray-600 mb-4">Upload existing photos for comprehensive skin analysis and detailed reporting</p>
+                        <ul class="text-sm text-gray-500 mb-6 space-y-1">
+                            <li>• Support for multiple image formats</li>
+                            <li>• Batch processing capabilities</li>
+                            <li>• Historical comparison tracking</li>
+                            <li>• Detailed analysis reports</li>
+                        </ul>
+                        <button onclick="showPage('analysis')" class="text-purple-600 font-semibold hover:text-purple-700">Upload Photo →</button>
+                    </div>
+                    
+                    <div class="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition duration-300">
+                        <div class="text-4xl mb-4">🛍️</div>
+                        <h3 class="text-xl font-bold text-gray-900 mb-3">Product Recommendations</h3>
+                        <p class="text-gray-600 mb-4">Personalized skincare product suggestions based on your unique skin profile</p>
+                        <ul class="text-sm text-gray-500 mb-6 space-y-1">
+                            <li>• AI-matched product suggestions</li>
+                            <li>• Ingredient compatibility analysis</li>
+                            <li>• Budget-friendly alternatives</li>
+                            <li>• User reviews and ratings</li>
+                        </ul>
+                        <button class="text-purple-600 font-semibold hover:text-purple-700">View Products →</button>
+                    </div>
+                    
+                    <div class="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition duration-300">
+                        <div class="text-4xl mb-4">📅</div>
+                        <h3 class="text-xl font-bold text-gray-900 mb-3">Custom Routine Planner</h3>
+                        <p class="text-gray-600 mb-4">Personalized skincare routines with smart scheduling and progress tracking</p>
+                        <ul class="text-sm text-gray-500 mb-6 space-y-1">
+                            <li>• Morning and evening routines</li>
+                            <li>• Smart reminder notifications</li>
+                            <li>• Progress tracking and analytics</li>
+                            <li>• Routine optimization suggestions</li>
+                        </ul>
+                        <button class="text-purple-600 font-semibold hover:text-purple-700">Create Routine →</button>
+                    </div>
+                    
+                    <div class="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition duration-300">
+                        <div class="text-4xl mb-4">📊</div>
+                        <h3 class="text-xl font-bold text-gray-900 mb-3">Progress Tracking</h3>
+                        <p class="text-gray-600 mb-4">Monitor your skin improvement over time with detailed analytics and insights</p>
+                        <ul class="text-sm text-gray-500 mb-6 space-y-1">
+                            <li>• Before/after comparisons</li>
+                            <li>• Skin health score tracking</li>
+                            <li>• Weekly progress reports</li>
+                            <li>• Goal achievement metrics</li>
+                        </ul>
+                        <button class="text-purple-600 font-semibold hover:text-purple-700">Track Progress →</button>
+                    </div>
+                    
+                    <div class="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition duration-300">
+                        <div class="text-4xl mb-4">💬</div>
+                        <h3 class="text-xl font-bold text-gray-900 mb-3">AI Skincare Assistant</h3>
+                        <p class="text-gray-600 mb-4">24/7 personalized skincare advice from our intelligent chatbot assistant</p>
+                        <ul class="text-sm text-gray-500 mb-6 space-y-1">
+                            <li>• Instant answers to skincare questions</li>
+                            <li>• Ingredient information and advice</li>
+                            <li>• Routine troubleshooting</li>
+                            <li>• Product usage guidance</li>
+                        </ul>
+                        <button onclick="toggleChatbot()" class="text-purple-600 font-semibold hover:text-purple-700">Chat Now →</button>
+                    </div>
+                </div>
+
+                <!-- Pricing Section -->
+                <div class="text-center mb-16">
+                    <h2 class="text-3xl font-bold text-gray-900 mb-4">Choose Your Plan</h2>
+                    <p class="text-xl text-gray-600">Flexible pricing for every skincare journey</p>
+                </div>
+                
+                <div class="grid md:grid-cols-3 gap-8">
+                    <div class="bg-white p-8 rounded-2xl shadow-lg">
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">Basic</h3>
+                        <div class="text-3xl font-bold text-purple-600 mb-4">Free</div>
+                        <ul class="space-y-3 text-gray-600 mb-8">
+                            <li class="flex items-center"><span class="text-green-500 mr-2">✓</span> 3 analyses per month</li>
+                            <li class="flex items-center"><span class="text-green-500 mr-2">✓</span> Basic skin assessment</li>
+                            <li class="flex items-center"><span class="text-green-500 mr-2">✓</span> General recommendations</li>
+                            <li class="flex items-center"><span class="text-gray-400 mr-2">✗</span> Advanced analytics</li>
+                        </ul>
+                        <button class="w-full bg-gray-200 text-gray-800 py-3 rounded-full hover:bg-gray-300">Get Started</button>
+                    </div>
+                    
+                    <div class="bg-white p-8 rounded-2xl shadow-lg border-2 border-purple-500 relative">
+                        <div class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-purple-500 text-white px-4 py-1 rounded-full text-sm">Most Popular</div>
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">Pro</h3>
+                        <div class="text-3xl font-bold text-purple-600 mb-4">$9.99<span class="text-lg text-gray-500">/month</span></div>
+                        <ul class="space-y-3 text-gray-600 mb-8">
+                            <li class="flex items-center"><span class="text-green-500 mr-2">✓</span> Unlimited analyses</li>
+                            <li class="flex items-center"><span class="text-green-500 mr-2">✓</span> Advanced skin assessment</li>
+                            <li class="flex items-center"><span class="text-green-500 mr-2">✓</span> Personalized routines</li>
+                            <li class="flex items-center"><span class="text-green-500 mr-2">✓</span> Progress tracking</li>
+                        </ul>
+                        <button class="w-full bg-purple-600 text-white py-3 rounded-full hover:bg-purple-700">Start Pro Trial</button>
+                    </div>
+                    
+                    <div class="bg-white p-8 rounded-2xl shadow-lg">
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">Enterprise</h3>
+                        <div class="text-3xl font-bold text-purple-600 mb-4">Custom</div>
+                        <ul class="space-y-3 text-gray-600 mb-8">
+                            <li class="flex items-center"><span class="text-green-500 mr-2">✓</span> Everything in Pro</li>
+                            <li class="flex items-center"><span class="text-green-500 mr-2">✓</span> API access</li>
+                            <li class="flex items-center"><span class="text-green-500 mr-2">✓</span> White-label solutions</li>
+                            <li class="flex items-center"><span class="text-green-500 mr-2">✓</span> Priority support</li>
+                        </ul>
+                        <button class="w-full bg-gray-800 text-white py-3 rounded-full hover:bg-gray-900">Contact Sales</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Analysis Page -->
+    <div id="analysisPage" class="page">
+        <section class="py-20 bg-gradient-to-br from-purple-50 to-blue-50 min-h-screen">
+            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-16">
+                    <h1 class="text-5xl font-bold text-gray-900 mb-6">AI Skin Analysis</h1>
+                    <p class="text-xl text-gray-600">Get professional-grade skin assessment in seconds</p>
+                </div>
+
+                <!-- Instructions and Permission Guide -->
+                <div id="instructionsModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+                    <div class="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+                        <div class="p-8">
+                            <div class="flex justify-between items-center mb-8">
+                                <h2 class="text-3xl font-bold text-gray-900">📖 How MySkinny Works</h2>
+                                <button onclick="closeInstructions()" class="text-gray-500 hover:text-gray-700">
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                            
+                            <!-- Step-by-step guide with images -->
+                            <div class="grid md:grid-cols-2 gap-8 mb-8">
+                                <div>
+                                    <h3 class="text-xl font-bold text-gray-900 mb-4">📱 Perfect Photo Guidelines</h3>
+                                    <div class="space-y-4">
+                                        <div class="flex items-start space-x-3">
+                                            <div class="bg-green-100 text-green-600 rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold">1</div>
+                                            <div>
+                                                <h4 class="font-semibold text-gray-900">Clean Face</h4>
+                                                <p class="text-gray-600 text-sm">Remove all makeup, wash your face gently</p>
+                                            </div>
+                                        </div>
+                                        <div class="flex items-start space-x-3">
+                                            <div class="bg-green-100 text-green-600 rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold">2</div>
+                                            <div>
+                                                <h4 class="font-semibold text-gray-900">Good Lighting</h4>
+                                                <p class="text-gray-600 text-sm">Use natural daylight or bright indoor lighting</p>
+                                            </div>
+                                        </div>
+                                        <div class="flex items-start space-x-3">
+                                            <div class="bg-green-100 text-green-600 rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold">3</div>
+                                            <div>
+                                                <h4 class="font-semibold text-gray-900">Face Position</h4>
+                                                <p class="text-gray-600 text-sm">Look directly at camera, face centered</p>
+                                            </div>
+                                        </div>
+                                        <div class="flex items-start space-x-3">
+                                            <div class="bg-green-100 text-green-600 rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold">4</div>
+                                            <div>
+                                                <h4 class="font-semibold text-gray-900">Stay Still</h4>
+                                                <p class="text-gray-600 text-sm">Hold steady for clear, sharp image</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Visual examples -->
+                                <div>
+                                    <h3 class="text-xl font-bold text-gray-900 mb-4">✅ Good vs ❌ Avoid</h3>
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <!-- Good example -->
+                                        <div class="border-2 border-green-400 rounded-xl p-4 bg-green-50">
+                                            <div class="bg-gradient-to-br from-green-100 to-green-200 rounded-lg h-24 flex items-center justify-center mb-2">
+                                                <div class="text-2xl">😊</div>
+                                            </div>
+                                            <p class="text-xs text-green-700 font-medium text-center">✅ Perfect: Clean, well-lit, centered</p>
+                                        </div>
+                                        
+                                        <!-- Bad example -->
+                                        <div class="border-2 border-red-400 rounded-xl p-4 bg-red-50">
+                                            <div class="bg-gradient-to-br from-red-100 to-red-200 rounded-lg h-24 flex items-center justify-center mb-2">
+                                                <div class="text-2xl">😵</div>
+                                            </div>
+                                            <p class="text-xs text-red-700 font-medium text-center">❌ Avoid: Dark, blurry, angled</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Privacy assurance -->
+                                    <div class="mt-6 bg-blue-50 p-4 rounded-xl">
+                                        <div class="flex items-center space-x-2 mb-2">
+                                            <svg class="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"></path>
+                                            </svg>
+                                            <h4 class="font-semibold text-blue-900">100% Private & Secure</h4>
+                                        </div>
+                                        <p class="text-sm text-blue-800">Your photos are analyzed locally on your device and never uploaded to our servers. Complete privacy guaranteed.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="text-center">
+                                <button onclick="closeInstructions(); showPage('analysis')" class="bg-purple-600 text-white px-8 py-3 rounded-full hover:bg-purple-700 transition duration-300">
+                                    Got It! Start My Analysis
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Camera Permission Guide -->
+                <div id="permissionGuide" class="camera-permission-guide p-8 rounded-2xl mb-8">
+                    <div class="text-center mb-6">
+                        <div class="text-4xl mb-4">🔒</div>
+                        <h3 class="text-2xl font-bold text-gray-900 mb-2">Camera Permission Required</h3>
+                        <p class="text-gray-600">To provide accurate skin analysis, we need access to your camera. Your privacy is our priority - images are processed locally and never stored.</p>
+                    </div>
+                    
+                    <div class="grid md:grid-cols-3 gap-6 mb-8">
+                        <div id="step1" class="permission-step bg-white p-6 rounded-xl border-2 border-gray-200">
+                            <div class="text-center">
+                                <div class="text-3xl mb-3">📹</div>
+                                <h4 class="font-semibold text-gray-900 mb-2">Step 1: Allow Camera</h4>
+                                <p class="text-sm text-gray-600">Click "Allow" when your browser asks for camera permission</p>
+                            </div>
+                        </div>
+                        <div id="step2" class="permission-step bg-white p-6 rounded-xl border-2 border-gray-200">
+                            <div class="text-center">
+                                <div class="text-3xl mb-3">🎯</div>
+                                <h4 class="font-semibold text-gray-900 mb-2">Step 2: Position Face</h4>
+                                <p class="text-sm text-gray-600">Align your face within the guide for optimal analysis</p>
+                            </div>
+                        </div>
+                        <div id="step3" class="permission-step bg-white p-6 rounded-xl border-2 border-gray-200">
+                            <div class="text-center">
+                                <div class="text-3xl mb-3">⚡</div>
+                                <h4 class="font-semibold text-gray-900 mb-2">Step 3: Get Results</h4>
+                                <p class="text-sm text-gray-600">Receive instant analysis and personalized recommendations</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="text-center">
+                        <button onclick="requestCameraPermission()" class="bg-purple-600 text-white px-8 py-3 rounded-full hover:bg-purple-700 transition duration-300 mr-4">
+                            Enable Camera Access
+                        </button>
+                        <button onclick="showPhotoUpload()" class="bg-gray-200 text-gray-800 px-8 py-3 rounded-full hover:bg-gray-300 transition duration-300">
+                            Upload Photo Instead
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Analysis Methods -->
+                <div id="analysisInterface" class="hidden">
+                    <!-- Webcam Analysis -->
+                    <div id="webcamAnalysis" class="bg-white p-8 rounded-2xl shadow-lg mb-8">
+                        <h3 class="text-2xl font-bold text-gray-900 mb-6 text-center">Live Camera Analysis</h3>
+                        
+                        <div class="mb-6">
+                            <div class="relative bg-black rounded-lg overflow-hidden">
+                                <video id="webcamVideo" class="w-full h-80 object-cover" autoplay muted></video>
+                                <canvas id="webcamCanvas" class="hidden"></canvas>
+                                
+                                <!-- Face Detection Overlay -->
+                                <div id="faceOverlay" class="absolute inset-0 pointer-events-none">
+                                    <div class="face-guide absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-56 h-64 border-3 border-green-400 rounded-full opacity-80">
+                                        <div class="absolute -top-10 left-1/2 transform -translate-x-1/2 text-green-400 text-sm font-medium bg-black bg-opacity-50 px-3 py-1 rounded">
+                                            Position your face here
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Analysis Status -->
+                                <div id="analysisStatus" class="absolute bottom-4 left-4 right-4">
+                                    <div class="bg-black bg-opacity-80 text-white px-4 py-3 rounded-lg">
+                                        <div id="statusText" class="text-center font-medium">Camera ready! Position your face in the guide.</div>
+                                        <div id="qualityIndicators" class="mt-3 grid grid-cols-3 gap-4 text-xs">
+                                            <div class="text-center">
+                                                <div id="lightingStatus" class="text-yellow-400">Lighting: Checking...</div>
+                                            </div>
+                                            <div class="text-center">
+                                                <div id="positionStatus" class="text-yellow-400">Position: Checking...</div>
+                                            </div>
+                                            <div class="text-center">
+                                                <div id="clarityStatus" class="text-yellow-400">Clarity: Checking...</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="text-center">
+                            <button id="captureBtn" onclick="captureWebcamPhoto()" class="bg-purple-600 text-white px-8 py-3 rounded-full hover:bg-purple-700 transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                                <span id="captureText">Capture & Analyze</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Photo Upload Analysis -->
+                    <div id="photoAnalysis" class="bg-white p-8 rounded-2xl shadow-lg hidden">
+                        <h3 class="text-2xl font-bold text-gray-900 mb-6 text-center">Photo Upload Analysis</h3>
+                        
+                        <div class="mb-6">
+                            <div class="border-2 border-dashed border-gray-300 rounded-lg p-12 text-center">
+                                <div class="text-4xl mb-4">📸</div>
+                                <h4 class="text-xl font-semibold text-gray-900 mb-2">Upload Your Photo</h4>
+                                <p class="text-gray-600 mb-4">For best results: Good lighting, face centered, no makeup</p>
+                                <p class="text-sm text-gray-500 mb-6">Supported formats: JPG, PNG, HEIC (Max 10MB)</p>
+                                
+                                <input type="file" id="skinPhoto" accept="image/*" class="hidden">
+                                <button onclick="document.getElementById('skinPhoto').click()" class="bg-purple-600 text-white px-6 py-3 rounded-full hover:bg-purple-700 transition duration-300">
+                                    Choose Photo
+                                </button>
+                                
+                                <div id="photoPreview" class="mt-6 hidden">
+                                    <img id="previewImage" class="max-w-full h-48 object-cover rounded-lg mx-auto shadow-lg">
+                                    <p class="text-sm text-gray-500 mt-2">Photo ready for analysis</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="text-center">
+                            <button onclick="analyzePhoto()" class="bg-purple-600 text-white px-8 py-3 rounded-full hover:bg-purple-700 transition duration-300">
+                                Analyze Photo
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Analysis Tips -->
+                <div class="bg-white p-6 rounded-2xl shadow-lg">
+                    <h4 class="text-lg font-semibold text-gray-900 mb-4">Tips for Best Results</h4>
+                    <div class="grid md:grid-cols-2 gap-4 text-sm text-gray-600">
+                        <div class="flex items-start">
+                            <span class="text-green-500 mr-2 mt-1">✓</span>
+                            <span>Use natural lighting or bright indoor light</span>
+                        </div>
+                        <div class="flex items-start">
+                            <span class="text-green-500 mr-2 mt-1">✓</span>
+                            <span>Remove makeup and cleanse your face</span>
+                        </div>
+                        <div class="flex items-start">
+                            <span class="text-green-500 mr-2 mt-1">✓</span>
+                            <span>Look directly at the camera</span>
+                        </div>
+                        <div class="flex items-start">
+                            <span class="text-green-500 mr-2 mt-1">✓</span>
+                            <span>Keep your face centered in the frame</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid md:grid-cols-4 gap-8 mb-12">
+                <div>
+                    <div class="text-2xl font-bold gradient-bg bg-clip-text text-transparent mb-4">MySkinny</div>
+                    <p class="text-gray-300 mb-6">AI-powered skincare analysis for healthier, more beautiful skin.</p>
+                    <div class="flex space-x-4">
+                        <a href="#" target="_blank" rel="noopener noreferrer" class="bg-blue-600 hover:bg-blue-700 p-2 rounded-full transition duration-300">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"/>
+                            </svg>
+                        </a>
+                        <a href="#" target="_blank" rel="noopener noreferrer" class="bg-blue-800 hover:bg-blue-900 p-2 rounded-full transition duration-300">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                            </svg>
+                        </a>
+                        <a href="#" target="_blank" rel="noopener noreferrer" class="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 p-2 rounded-full transition duration-300">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Quick Links</h3>
+                    <ul class="space-y-2 text-gray-300">
+                        <li><a href="#" onclick="showPage('home')" class="hover:text-white transition duration-300">Home</a></li>
+                        <li><a href="#" onclick="showPage('about')" class="hover:text-white transition duration-300">About</a></li>
+                        <li><a href="#" onclick="showPage('services')" class="hover:text-white transition duration-300">Services</a></li>
+                        <li><a href="#" onclick="showPage('analysis')" class="hover:text-white transition duration-300">Analysis</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Services</h3>
+                    <ul class="space-y-2 text-gray-300">
+                        <li><a href="#" class="hover:text-white transition duration-300">Skin Analysis</a></li>
+                        <li><a href="#" class="hover:text-white transition duration-300">Product Recommendations</a></li>
+                        <li><a href="#" class="hover:text-white transition duration-300">Routine Planning</a></li>
+                        <li><a href="#" class="hover:text-white transition duration-300">Progress Tracking</a></li>
+                        <li><a href="#" class="hover:text-white transition duration-300">AI Assistant</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Support</h3>
+                    <ul class="space-y-2 text-gray-300">
+                        <li><a href="#" class="hover:text-white transition duration-300">Help Center</a></li>
+                        <li><a href="#" class="hover:text-white transition duration-300">Privacy Policy</a></li>
+                        <li><a href="#" class="hover:text-white transition duration-300">Terms of Service</a></li>
+                        <li><a href="#" class="hover:text-white transition duration-300">API Documentation</a></li>
+                        <li><a href="#" onclick="toggleChatbot()" class="hover:text-white transition duration-300">AI Support</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-gray-700 pt-8 text-center text-gray-300">
+                <p>&copy; 2024 MySkinny. All rights reserved. | Made with ❤️ for better skin health</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Chatbot -->
+    <div class="chatbot-container">
+        <div id="chatbot" class="bg-white rounded-2xl shadow-2xl w-80 h-96 hidden">
+            <div class="bg-purple-600 text-white p-4 rounded-t-2xl">
+                <div class="flex justify-between items-center">
+                    <h3 class="font-semibold">MySkinny Assistant</h3>
+                    <button onclick="toggleChatbot()" class="text-white hover:text-gray-200">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <div id="chatMessages" class="p-4 h-64 overflow-y-auto">
+                <div class="bg-gray-100 p-3 rounded-lg mb-3">
+                    <p class="text-sm" id="chatWelcome">Hi! I'm your AI skincare assistant. How can I help you today?</p>
+                </div>
+            </div>
+            <div class="p-4 border-t">
+                <div class="flex">
+                    <input type="text" id="chatInput" placeholder="Ask about skincare..." 
+                           class="flex-1 px-3 py-2 border border-gray-300 rounded-l-full focus:outline-none focus:ring-2 focus:ring-purple-500">
+                    <button onclick="sendMessage()" class="bg-purple-600 text-white px-4 py-2 rounded-r-full hover:bg-purple-700">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <button id="chatbotToggle" onclick="toggleChatbot()" class="bg-purple-600 text-white p-4 rounded-full shadow-lg hover:bg-purple-700 transition duration-300">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+            </svg>
+        </button>
+    </div>
+
+    <script>
+        // Language System
+        let currentLanguage = 'en';
+        const translations = {
+            en: {
+                // Brand name and core content
+                brandName: "MySkinny",
+                tagline: "by Gayathri",
+                welcome: "Transform Your Skin Journey",
+                subtitle: "Discover your skin's true potential with AI-powered analysis. Detect dark spots, acne, hydration levels and get personalized skincare solutions in seconds.",
+                startAnalysis: "🚀 Start Free Analysis Now",
+                howItWorks: "📖 See How It Works",
+                
+                // Navigation
+                home: "Home",
+                about: "About",
+                services: "Services",
+                analysis: "Analysis",
+                language: "🌍 Language",
+                
+                // Search and UI
+                searchPlaceholder: "Search skincare tips, products...",
+                chooseLanguage: "Choose Your Language",
+                selectLanguage: "Select your preferred language to continue",
+                close: "✕ Close",
+                
+                // Hero section benefits
+                benefit1Title: "Instant AI-powered skin analysis",
+                benefit1Desc: "Advanced computer vision technology",
+                benefit2Title: "Detect dark spots & pigmentation",
+                benefit2Desc: "Professional-grade skin concern identification",
+                benefit3Title: "100% privacy-protected analysis",
+                benefit3Desc: "Your data never leaves your device",
+                
+                // Stats section
+                statsTitle: "Trusted by Thousands",
+                statsSubtitle: "Join the skincare revolution with MySkinny",
+                analyses: "Skin Analyses",
+                accuracy: "Accuracy Rate",
+                analysisTime: "Analysis Time",
+                userRating: "User Rating",
+                
+                // Chatbot
+                chatbotTitle: "MySkinny Assistant",
+                chatPlaceholder: "Ask about skincare...",
+                chatWelcome: "Hi! I'm your AI skincare assistant. How can I help you today?",
+                
+                // Analysis page
+                analysisTitle: "AI Skin Analysis",
+                analysisSubtitle: "Get professional-grade skin assessment in seconds",
+                cameraPermissionTitle: "Camera Permission Required",
+                cameraPermissionDesc: "To provide accurate skin analysis, we need access to your camera. Your privacy is our priority - images are processed locally and never stored.",
+                enableCamera: "Enable Camera Access",
+                uploadInstead: "Upload Photo Instead",
+                
+                // Footer
+                footerDesc: "AI-powered skincare analysis for healthier, more beautiful skin.",
+                quickLinks: "Quick Links",
+                servicesFooter: "Services",
+                support: "Support"
+            },
+            hi: {
+                // Brand name and core content
+                brandName: "मायस्किनी",
+                tagline: "गायत्री द्वारा",
+                welcome: "अपनी त्वचा की यात्रा को बदलें",
+                subtitle: "AI-संचालित विश्लेषण के साथ अपनी त्वचा की वास्तविक क्षमता खोजें। डार्क स्पॉट्स, मुंहासे, हाइड्रेशन लेवल का पता लगाएं और सेकंडों में व्यक्तिगत स्किनकेयर समाधान प्राप्त करें।",
+                startAnalysis: "🚀 अभी मुफ्त विश्लेषण शुरू करें",
+                howItWorks: "📖 देखें यह कैसे काम करता है",
+                
+                // Navigation
+                home: "होम",
+                about: "हमारे बारे में",
+                services: "सेवाएं",
+                analysis: "विश्लेषण",
+                language: "🌍 भाषा",
+                
+                // Search and UI
+                searchPlaceholder: "स्किनकेयर टिप्स, उत्पाद खोजें...",
+                chooseLanguage: "अपनी भाषा चुनें",
+                selectLanguage: "जारी रखने के लिए अपनी पसंदीदा भाषा चुनें",
+                close: "✕ बंद करें",
+                
+                // Hero section benefits
+                benefit1Title: "तत्काल AI-संचालित त्वचा विश्लेषण",
+                benefit1Desc: "उन्नत कंप्यूटर विज़न तकनीक",
+                benefit2Title: "डार्क स्पॉट्स और पिगमेंटेशन का पता लगाएं",
+                benefit2Desc: "पेशेवर-ग्रेड त्वचा समस्या पहचान",
+                benefit3Title: "100% गोपनीयता-संरक्षित विश्लेषण",
+                benefit3Desc: "आपका डेटा कभी आपके डिवाइस को नहीं छोड़ता",
+                
+                // Stats section
+                statsTitle: "हजारों लोगों का भरोसा",
+                statsSubtitle: "मायस्किनी के साथ स्किनकेयर क्रांति में शामिल हों",
+                analyses: "त्वचा विश्लेषण",
+                accuracy: "सटीकता दर",
+                analysisTime: "विश्लेषण समय",
+                userRating: "उपयोगकर्ता रेटिंग",
+                
+                // Chatbot
+                chatbotTitle: "मायस्किनी सहायक",
+                chatPlaceholder: "स्किनकेयर के बारे में पूछें...",
+                chatWelcome: "नमस्ते! मैं आपका AI स्किनकेयर सहायक हूं। आज मैं आपकी कैसे मदद कर सकता हूं?",
+                
+                // Analysis page
+                analysisTitle: "AI त्वचा विश्लेषण",
+                analysisSubtitle: "सेकंडों में पेशेवर-ग्रेड त्वचा मूल्यांकन प्राप्त करें",
+                cameraPermissionTitle: "कैमरा अनुमति आवश्यक",
+                cameraPermissionDesc: "सटीक त्वचा विश्लेषण प्रदान करने के लिए, हमें आपके कैमरे तक पहुंच की आवश्यकता है। आपकी गोपनीयता हमारी प्राथमिकता है - छवियां स्थानीय रूप से संसाधित होती हैं और कभी संग्रहीत नहीं होतीं।",
+                enableCamera: "कैमरा एक्सेस सक्षम करें",
+                uploadInstead: "इसके बजाय फोटो अपलोड करें",
+                
+                // Footer
+                footerDesc: "स्वस्थ, अधिक सुंदर त्वचा के लिए AI-संचालित स्किनकेयर विश्लेषण।",
+                quickLinks: "त्वरित लिंक",
+                servicesFooter: "सेवाएं",
+                support: "सहायता"
+            },
+            ta: {
+                // Brand name and core content
+                brandName: "மைஸ்கின்னி",
+                tagline: "கயத்ரியால்",
+                welcome: "உங்கள் சரும பயணத்தை மாற்றுங்கள்",
+                subtitle: "AI-இயங்கும் பகுப்பாய்வுடன் உங்கள் சருமத்தின் உண்மையான திறனைக் கண்டறியுங்கள். கருமையான புள்ளிகள், முகப்பரு, நீரேற்ற அளவுகளைக் கண்டறிந்து நொடிகளில் தனிப்பயனாக்கப்பட்ட சரும பராமரிப்பு தீர்வுகளைப் பெறுங்கள்.",
+                startAnalysis: "🚀 இப்போதே இலவச பகுப்பாய்வு தொடங்குங்கள்",
+                howItWorks: "📖 இது எப்படி வேலை செய்கிறது என்று பாருங்கள்",
+                
+                // Navigation
+                home: "முகப்பு",
+                about: "எங்களைப் பற்றி",
+                services: "சேவைகள்",
+                analysis: "பகுப்பாய்வு",
+                language: "🌍 மொழி",
+                
+                // Search and UI
+                searchPlaceholder: "சரும பராமரிப்பு குறிப்புகள், தயாரிப்புகளைத் தேடுங்கள்...",
+                chooseLanguage: "உங்கள் மொழியைத் தேர்ந்தெடுக்கவும்",
+                selectLanguage: "தொடர உங்கள் விருப்பமான மொழியைத் தேர்ந்தெடுக்கவும்",
+                close: "✕ மூடு",
+                
+                // Hero section benefits
+                benefit1Title: "உடனடி AI-இயங்கும் சரும பகுப்பாய்வு",
+                benefit1Desc: "மேம்பட்ட கணினி பார்வை தொழில்நுட்பம்",
+                benefit2Title: "கருமையான புள்ளிகள் & நிறமி கண்டறிதல்",
+                benefit2Desc: "தொழில்முறை-தர சரும கவலை அடையாளம்",
+                benefit3Title: "100% தனியுரிமை-பாதுகாக்கப்பட்ட பகுப்பாய்வு",
+                benefit3Desc: "உங்கள் தரவு உங்கள் சாதனத்தை விட்டு வெளியேறாது",
+                
+                // Stats section
+                statsTitle: "ஆயிரக்கணக்கானோரின் நம்பிக்கை",
+                statsSubtitle: "மைஸ்கின்னியுடன் சரும பராமரிப்பு புரட்சியில் சேருங்கள்",
+                analyses: "சரும பகுப்பாய்வுகள்",
+                accuracy: "துல்லிய விகிதம்",
+                analysisTime: "பகுப்பாய்வு நேரம்",
+                userRating: "பயனர் மதிப்பீடு",
+                
+                // Chatbot
+                chatbotTitle: "மைஸ்கின்னி உதவியாளர்",
+                chatPlaceholder: "சரும பராமரிப்பு பற்றி கேளுங்கள்...",
+                chatWelcome: "வணக்கம்! நான் உங்கள் AI சரும பராமரிப்பு உதவியாளர். இன்று நான் உங்களுக்கு எப்படி உதவ முடியும்?",
+                
+                // Analysis page
+                analysisTitle: "AI சரும பகுப்பாய்வு",
+                analysisSubtitle: "நொடிகளில் தொழில்முறை-தர சரும மதிப்பீடு பெறுங்கள்",
+                cameraPermissionTitle: "கேமரா அனுமதி தேவை",
+                cameraPermissionDesc: "துல்லியமான சரும பகுப்பாய்வு வழங்க, உங்கள் கேமராவிற்கான அணுகல் எங்களுக்குத் தேவை. உங்கள் தனியுரிமை எங்கள் முன்னுரிமை - படங்கள் உள்ளூரில் செயலாக்கப்பட்டு ஒருபோதும் சேமிக்கப்படுவதில்லை.",
+                enableCamera: "கேமரா அணுகலை இயக்கு",
+                uploadInstead: "அதற்கு பதிலாக புகைப்படம் பதிவேற்றவும்",
+                
+                // Footer
+                footerDesc: "ஆரோக்கியமான, அழகான சருமத்திற்கான AI-இயங்கும் சரும பராமரிப்பு பகுப்பாய்வு.",
+                quickLinks: "விரைவு இணைப்புகள்",
+                servicesFooter: "சேவைகள்",
+                support: "ஆதரவு"
+            },
+            te: {
+                // Brand name and core content
+                brandName: "మైస్కిన్నీ",
+                tagline: "గాయత్రిచే",
+                welcome: "మీ చర్మ ప్రయాణాన్ని మార్చండి",
+                subtitle: "AI-శక్తితో కూడిన విశ్లేషణతో మీ చర్మం యొక్క నిజమైన సామర్థ్యాన్ని కనుగొనండి. డార్క్ స్పాట్స్, మొటిమలు, హైడ్రేషన్ స్థాయిలను గుర్తించి సెకన్లలో వ్యక్తిగతీకరించిన స్కిన్‌కేర్ పరిష్కారాలను పొందండి.",
+                startAnalysis: "🚀 ఇప్పుడే ఉచిత విశ్లేషణ ప్రారంభించండి",
+                howItWorks: "📖 ఇది ఎలా పని చేస్తుందో చూడండి",
+                
+                // Navigation
+                home: "హోమ్",
+                about: "మా గురించి",
+                services: "సేవలు",
+                analysis: "విశ్లేషణ",
+                language: "🌍 భాష",
+                
+                // Search and UI
+                searchPlaceholder: "స్కిన్‌కేర్ చిట్కాలు, ఉత్పత్తులను వెతకండి...",
+                chooseLanguage: "మీ భాషను ఎంచుకోండి",
+                selectLanguage: "కొనసాగించడానికి మీ ఇష్టమైన భాషను ఎంచుకోండి",
+                close: "✕ మూసివేయండి",
+                
+                // Hero section benefits
+                benefit1Title: "తక్షణ AI-శక్తితో కూడిన చర్మ విశ్లేషణ",
+                benefit1Desc: "అధునాతన కంప్యూటర్ విజన్ టెక్నాలజీ",
+                benefit2Title: "డార్క్ స్పాట్స్ & పిగ్మెంటేషన్ గుర్తింపు",
+                benefit2Desc: "వృత్తిపరమైన-గ్రేడ్ చర్మ సమస్య గుర్తింపు",
+                benefit3Title: "100% గోప్యత-రక్షిత విశ్లేషణ",
+                benefit3Desc: "మీ డేటా మీ పరికరాన్ని ఎప్పుడూ వదిలిపోదు",
+                
+                // Stats section
+                statsTitle: "వేలాది మంది నమ్మకం",
+                statsSubtitle: "మైస్కిన్నీతో స్కిన్‌కేర్ విప్లవంలో చేరండి",
+                analyses: "చర్మ విశ్లేషణలు",
+                accuracy: "ఖచ్చితత్వ రేటు",
+                analysisTime: "విశ్లేషణ సమయం",
+                userRating: "వినియోగదారు రేటింగ్",
+                
+                // Chatbot
+                chatbotTitle: "మైస్కిన్నీ అసిస్టెంట్",
+                chatPlaceholder: "స్కిన్‌కేర్ గురించి అడగండి...",
+                chatWelcome: "నమస్కారం! నేను మీ AI స్కిన్‌కేర్ అసిస్టెంట్. ఈరోజు నేను మీకు ఎలా సహాయం చేయగలను?",
+                
+                // Analysis page
+                analysisTitle: "AI చర్మ విశ్లేషణ",
+                analysisSubtitle: "సెకన్లలో వృత్తిపరమైన-గ్రేడ్ చర్మ అంచనా పొందండి",
+                cameraPermissionTitle: "కెమెరా అనుమతి అవసరం",
+                cameraPermissionDesc: "ఖచ్చితమైన చర్మ విశ్లేషణ అందించడానికి, మీ కెమెరాకు యాక్సెస్ అవసరం. మీ గోప్యత మా ప్రాధాన్యత - చిత్రాలు స్థానికంగా ప్రాసెస్ చేయబడతాయి మరియు ఎప్పుడూ నిల్వ చేయబడవు.",
+                enableCamera: "కెమెరా యాక్సెస్ ఎనేబుల్ చేయండి",
+                uploadInstead: "బదులుగా ఫోటో అప్‌లోడ్ చేయండి",
+                
+                // Footer
+                footerDesc: "ఆరోగ్యకరమైన, మరింత అందమైన చర్మం కోసం AI-శక్తితో కూడిన స్కిన్‌కేర్ విశ్లేషణ.",
+                quickLinks: "త్వరిత లింక్‌లు",
+                servicesFooter: "సేవలు",
+                support: "మద్దతు"
+            }
+        };
+
+        // Page Navigation
+        let currentPage = 'home';
+        let webcamStream = null;
+        let analysisInterval = null;
+
+        // Language Functions
+        function setLanguage(lang) {
+            currentLanguage = lang;
+            updatePageContent();
+            hideLanguageSelector();
+        }
+
+        function showLanguageSelector() {
+            document.getElementById('languageSelector').classList.remove('hidden');
+        }
+
+        function hideLanguageSelector() {
+            document.getElementById('languageSelector').classList.add('hidden');
+        }
+
+        function updatePageContent() {
+            const t = translations[currentLanguage];
+            
+            // Update brand name and tagline
+            const brandElements = document.querySelectorAll('.text-2xl.font-bold');
+            brandElements.forEach(el => {
+                if (el.textContent.includes('MySkinny') || el.textContent.includes('मायस्किनी') || el.textContent.includes('மைஸ்கின்னி') || el.textContent.includes('మైస్కిన్నీ')) {
+                    el.textContent = t.brandName;
+                }
+            });
+            
+            const taglineElements = document.querySelectorAll('.text-xs.text-gray-500');
+            taglineElements.forEach(el => {
+                if (el.textContent.includes('by Gayathri') || el.textContent.includes('गायत्री द्वारा') || el.textContent.includes('கயத்ரியால்') || el.textContent.includes('గాయత్రిచే')) {
+                    el.textContent = t.tagline;
+                }
+            });
+            
+            // Update navigation
+            const navLinks = document.querySelectorAll('.nav-link');
+            navLinks.forEach(link => {
+                const onclick = link.getAttribute('onclick');
+                if (onclick && onclick.includes("showPage('home')")) link.textContent = t.home;
+                if (onclick && onclick.includes("showPage('about')")) link.textContent = t.about;
+                if (onclick && onclick.includes("showPage('services')")) link.textContent = t.services;
+                if (onclick && onclick.includes("showPage('analysis')")) link.textContent = t.analysis;
+            });
+            
+            // Update language button
+            const langButton = document.querySelector('[onclick="showLanguageSelector()"]');
+            if (langButton) langButton.textContent = t.language;
+            
+            // Update search placeholder
+            document.getElementById('searchInput').placeholder = t.searchPlaceholder;
+            
+            // Update language selector
+            const langTitle = document.querySelector('#languageSelector h2');
+            if (langTitle) langTitle.textContent = t.chooseLanguage;
+            const langDesc = document.querySelector('#languageSelector p');
+            if (langDesc) langDesc.textContent = t.selectLanguage;
+            const closeBtn = document.querySelector('#languageSelector .text-gray-500');
+            if (closeBtn) closeBtn.textContent = t.close;
+            
+            // Update home page hero content
+            const welcomeTitle = document.querySelector('h1 .bg-gradient-to-r.from-purple-600');
+            if (welcomeTitle) welcomeTitle.textContent = 'Transform';
+            const journeyTitle = document.querySelector('h1 .bg-gradient-to-r.from-rose-500');
+            if (journeyTitle) journeyTitle.textContent = t.welcome.split(' ').slice(-2).join(' ');
+            
+            const subtitle = document.querySelector('.text-2xl.lg\\:text-3xl.mb-10');
+            if (subtitle) subtitle.innerHTML = t.subtitle;
+            
+            // Update CTA buttons
+            const startBtn = document.querySelector('.bg-gradient-to-r.from-purple-600.to-pink-600');
+            if (startBtn) startBtn.textContent = t.startAnalysis;
+            const howItWorksBtn = document.querySelector('.border-3.border-purple-600');
+            if (howItWorksBtn) howItWorksBtn.textContent = t.howItWorks;
+            
+            // Update benefits section
+            const benefits = document.querySelectorAll('.bg-white\\/60.backdrop-blur-sm');
+            if (benefits.length >= 3) {
+                const benefit1Title = benefits[0].querySelector('.text-xl.font-semibold');
+                const benefit1Desc = benefits[0].querySelector('.text-gray-600');
+                if (benefit1Title) benefit1Title.textContent = t.benefit1Title;
+                if (benefit1Desc) benefit1Desc.textContent = t.benefit1Desc;
+                
+                const benefit2Title = benefits[1].querySelector('.text-xl.font-semibold');
+                const benefit2Desc = benefits[1].querySelector('.text-gray-600');
+                if (benefit2Title) benefit2Title.textContent = t.benefit2Title;
+                if (benefit2Desc) benefit2Desc.textContent = t.benefit2Desc;
+                
+                const benefit3Title = benefits[2].querySelector('.text-xl.font-semibold');
+                const benefit3Desc = benefits[2].querySelector('.text-gray-600');
+                if (benefit3Title) benefit3Title.textContent = t.benefit3Title;
+                if (benefit3Desc) benefit3Desc.textContent = t.benefit3Desc;
+            }
+            
+            // Update stats section
+            const statsTitle = document.querySelector('.text-4xl.font-bold.text-gray-900.mb-4');
+            if (statsTitle && statsTitle.textContent.includes('Trusted')) {
+                statsTitle.textContent = t.statsTitle;
+            }
+            const statsSubtitle = document.querySelector('.text-xl.text-gray-600');
+            if (statsSubtitle && statsSubtitle.textContent.includes('revolution')) {
+                statsSubtitle.textContent = t.statsSubtitle;
+            }
+            
+            // Update stats cards
+            const statsCards = document.querySelectorAll('.stats-card .text-gray-600');
+            if (statsCards.length >= 4) {
+                statsCards[0].textContent = t.analyses;
+                statsCards[1].textContent = t.accuracy;
+                statsCards[2].textContent = t.analysisTime;
+                statsCards[3].textContent = t.userRating;
+            }
+            
+            // Update chatbot
+            const chatbotTitle = document.querySelector('#chatbot h3');
+            if (chatbotTitle) chatbotTitle.textContent = t.chatbotTitle;
+            const chatInput = document.getElementById('chatInput');
+            if (chatInput) chatInput.placeholder = t.chatPlaceholder;
+            
+            // Update analysis page
+            const analysisTitle = document.querySelector('#analysisPage h1');
+            if (analysisTitle) analysisTitle.textContent = t.analysisTitle;
+            const analysisSubtitle = document.querySelector('#analysisPage .text-xl.text-gray-600');
+            if (analysisSubtitle) analysisSubtitle.textContent = t.analysisSubtitle;
+            
+            // Update camera permission section
+            const permissionTitle = document.querySelector('#permissionGuide h3');
+            if (permissionTitle) permissionTitle.textContent = t.cameraPermissionTitle;
+            const permissionDesc = document.querySelector('#permissionGuide p');
+            if (permissionDesc) permissionDesc.textContent = t.cameraPermissionDesc;
+            
+            const enableCameraBtn = document.querySelector('[onclick="requestCameraPermission()"]');
+            if (enableCameraBtn) enableCameraBtn.textContent = t.enableCamera;
+            const uploadBtn = document.querySelector('[onclick="showPhotoUpload()"]');
+            if (uploadBtn) uploadBtn.textContent = t.uploadInstead;
+            
+            // Update footer
+            const footerDesc = document.querySelector('footer p');
+            if (footerDesc && footerDesc.textContent.includes('AI-powered')) {
+                footerDesc.textContent = t.footerDesc;
+            }
+            
+            const quickLinksTitle = document.querySelector('footer h3');
+            if (quickLinksTitle && quickLinksTitle.textContent === 'Quick Links') {
+                quickLinksTitle.textContent = t.quickLinks;
+            }
+            
+            const footerSections = document.querySelectorAll('footer h3');
+            footerSections.forEach(section => {
+                if (section.textContent === 'Services') section.textContent = t.servicesFooter;
+                if (section.textContent === 'Support') section.textContent = t.support;
+            });
+            
+            // Update chatbot welcome message
+            updateChatbotWelcome();
+        }
+
+        function updateChatbotWelcome() {
+            const welcomeMessages = {
+                en: "Hi! I'm your AI skincare assistant. How can I help you today?",
+                hi: "नमस्ते! मैं आपका AI स्किनकेयर असिस्टेंट हूं। आज मैं आपकी कैसे मदद कर सकता हूं?",
+                ta: "வணக்கம்! நான் உங்கள் AI சரும பராமரிப்பு உதவியாளர். இன்று நான் உங்களுக்கு எப்படி உதவ முடியும்?",
+                te: "నమస్కారం! నేను మీ AI స్కిన్‌కేర్ అసిస్టెంట్. ఈరోజు నేను మీకు ఎలా సహాయం చేయగలను?",
+                es: "¡Hola! Soy tu asistente de cuidado de la piel con IA. ¿Cómo puedo ayudarte hoy?",
+                fr: "Salut! Je suis votre assistant IA pour les soins de la peau. Comment puis-je vous aider aujourd'hui?",
+                de: "Hallo! Ich bin Ihr KI-Hautpflege-Assistent. Wie kann ich Ihnen heute helfen?",
+                zh: "你好！我是您的AI护肤助手。今天我可以为您做些什么？"
+            };
+            
+            const welcomeElement = document.getElementById('chatWelcome');
+            if (welcomeElement) {
+                welcomeElement.textContent = welcomeMessages[currentLanguage] || welcomeMessages.en;
+            }
+        }
+
+        function showInstructions() {
+            document.getElementById('instructionsModal').classList.remove('hidden');
+        }
+
+        function closeInstructions() {
+            document.getElementById('instructionsModal').classList.add('hidden');
+        }
+
+        function showPage(pageName) {
+            // Hide all pages
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            
+            // Show selected page
+            document.getElementById(pageName + 'Page').classList.add('active');
+            
+            // Update navigation
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            
+            // Find and activate current nav link
+            const activeLink = document.querySelector(`[onclick="showPage('${pageName}')"]`);
+            if (activeLink) {
+                activeLink.classList.add('active');
+            }
+            
+            currentPage = pageName;
+            
+            // Stop webcam if leaving analysis page
+            if (pageName !== 'analysis' && webcamStream) {
+                stopWebcam();
+            }
+            
+            // Scroll to top
+            window.scrollTo(0, 0);
+        }
+
+        // Search functionality
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                const query = this.value.toLowerCase();
+                if (query.includes('analysis') || query.includes('scan') || query.includes('camera')) {
+                    showPage('analysis');
+                } else if (query.includes('about') || query.includes('team')) {
+                    showPage('about');
+                } else if (query.includes('service') || query.includes('price')) {
+                    showPage('services');
+                } else if (query.includes('contact') || query.includes('support')) {
+                    showPage('contact');
+                } else {
+                    alert(`Searching for: ${this.value}`);
+                }
+                this.value = '';
+            }
+        });
+
+        // Camera Permission Functions
+        async function requestCameraPermission() {
+            try {
+                // Update step 1 as in progress
+                document.getElementById('step1').classList.add('completed');
+                
+                // Show loading state
+                const button = document.querySelector('[onclick="requestCameraPermission()"]');
+                const originalText = button.innerHTML;
+                button.innerHTML = '🔄 Requesting Access...';
+                button.disabled = true;
+                
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { 
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 },
+                        facingMode: 'user'
+                    } 
+                });
+                
+                // Permission granted - update UI
+                document.getElementById('step1').classList.add('completed');
+                document.getElementById('step2').classList.add('completed');
+                
+                // Show success message
+                const successDiv = document.createElement('div');
+                successDiv.className = 'bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg mt-4';
+                successDiv.innerHTML = `
+                    <div class="flex items-center">
+                        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                        </svg>
+                        <span>✅ Camera access granted! Starting your skin analysis...</span>
+                    </div>
+                `;
+                document.getElementById('permissionGuide').appendChild(successDiv);
+                
+                // Wait a moment to show success, then proceed
+                setTimeout(() => {
+                    // Hide permission guide and show analysis interface
+                    document.getElementById('permissionGuide').classList.add('hidden');
+                    document.getElementById('analysisInterface').classList.remove('hidden');
+                    
+                    // Start webcam
+                    webcamStream = stream;
+                    const video = document.getElementById('webcamVideo');
+                    video.srcObject = stream;
+                    
+                    // Start quality assessment after video loads
+                    video.addEventListener('loadedmetadata', () => {
+                        setTimeout(() => {
+                            startQualityAssessment();
+                        }, 1000);
+                    });
+                }, 1500);
+                
+            } catch (error) {
+                console.error('Camera permission denied:', error);
+                
+                // Reset button
+                const button = document.querySelector('[onclick="requestCameraPermission()"]');
+                button.innerHTML = 'Try Again - Enable Camera Access';
+                button.disabled = false;
+                
+                // Show detailed error message with troubleshooting
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mt-4';
+                errorDiv.innerHTML = `
+                    <div class="mb-3">
+                        <div class="flex items-center mb-2">
+                            <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                            </svg>
+                            <span class="font-semibold">Camera Access Needed</span>
+                        </div>
+                        <p class="text-sm mb-3">To analyze your skin, we need camera permission. Here's how to enable it:</p>
+                        <div class="text-sm space-y-1 ml-4">
+                            <p>• Look for a camera icon in your browser's address bar</p>
+                            <p>• Click "Allow" when prompted for camera access</p>
+                            <p>• If blocked, click the camera icon and select "Always allow"</p>
+                            <p>• Refresh the page if needed</p>
+                        </div>
+                    </div>
+                    <div class="flex space-x-2">
+                        <button onclick="requestCameraPermission()" class="bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700">
+                            Try Again
+                        </button>
+                        <button onclick="showPhotoUpload()" class="bg-gray-600 text-white px-3 py-1 rounded text-sm hover:bg-gray-700">
+                            Upload Photo Instead
+                        </button>
+                    </div>
+                `;
+                document.getElementById('permissionGuide').appendChild(errorDiv);
+            }
+        }
+
+        function showPhotoUpload() {
+            document.getElementById('permissionGuide').classList.add('hidden');
+            document.getElementById('analysisInterface').classList.remove('hidden');
+            document.getElementById('webcamAnalysis').classList.add('hidden');
+            document.getElementById('photoAnalysis').classList.remove('hidden');
+        }
+
+        // Webcam Functions
+        function startQualityAssessment() {
+            document.getElementById('qualityIndicators').classList.remove('hidden');
+            
+            // Start with initial assessment
+            let lightingGood = false;
+            let positionGood = false;
+            let clarityGood = false;
+            let assessmentCount = 0;
+            
+            analysisInterval = setInterval(() => {
+                assessmentCount++;
+                
+                // Gradually improve conditions to simulate real scanning
+                if (assessmentCount > 2) lightingGood = Math.random() > 0.3;
+                if (assessmentCount > 4) positionGood = Math.random() > 0.4;
+                if (assessmentCount > 6) clarityGood = Math.random() > 0.2;
+                
+                // After 8 seconds, ensure all conditions are good for demo
+                if (assessmentCount > 8) {
+                    lightingGood = true;
+                    positionGood = true;
+                    clarityGood = true;
+                }
+                
+                // Update status indicators with real-time feedback
+                document.getElementById('lightingStatus').innerHTML = lightingGood ? 
+                    '<span class="text-green-400">Lighting: Excellent ✓</span>' : 
+                    '<span class="text-yellow-400">Lighting: Move to brighter area</span>';
+                    
+                document.getElementById('positionStatus').innerHTML = positionGood ? 
+                    '<span class="text-green-400">Position: Perfect ✓</span>' : 
+                    '<span class="text-yellow-400">Position: Center your face</span>';
+                    
+                document.getElementById('clarityStatus').innerHTML = clarityGood ? 
+                    '<span class="text-green-400">Clarity: Sharp ✓</span>' : 
+                    '<span class="text-yellow-400">Clarity: Hold still</span>';
+                
+                // Enable capture button when all conditions are good
+                const captureBtn = document.getElementById('captureBtn');
+                const statusText = document.getElementById('statusText');
+                
+                if (lightingGood && positionGood && clarityGood) {
+                    captureBtn.disabled = false;
+                    captureBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                    captureBtn.classList.add('pulse-glow');
+                    statusText.innerHTML = '✨ <strong>Perfect conditions detected!</strong> Ready to capture and analyze your skin.';
+                    document.getElementById('step3').classList.add('completed');
+                    
+                    // Add visual feedback to face guide
+                    const faceGuide = document.querySelector('.face-guide');
+                    if (faceGuide) {
+                        faceGuide.classList.remove('border-green-400');
+                        faceGuide.classList.add('border-green-500', 'shadow-lg');
+                        faceGuide.style.boxShadow = '0 0 20px rgba(34, 197, 94, 0.5)';
+                    }
+                } else {
+                    captureBtn.disabled = true;
+                    captureBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                    captureBtn.classList.remove('pulse-glow');
+                    
+                    // Provide specific guidance
+                    let guidance = 'Optimizing scan conditions... ';
+                    if (!lightingGood) guidance += 'Need better lighting. ';
+                    if (!positionGood) guidance += 'Position face in center. ';
+                    if (!clarityGood) guidance += 'Keep steady. ';
+                    
+                    statusText.textContent = guidance;
+                }
+                
+                // Add scanning animation effect
+                const overlay = document.getElementById('faceOverlay');
+                if (overlay && (lightingGood || positionGood || clarityGood)) {
+                    overlay.style.background = 'linear-gradient(45deg, transparent 40%, rgba(34, 197, 94, 0.1) 50%, transparent 60%)';
+                    overlay.style.animation = 'scanning 2s infinite';
+                }
+            }, 1000);
+            
+            // Add scanning animation CSS
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes scanning {
+                    0% { background-position: -100% 0; }
+                    100% { background-position: 100% 0; }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+
+        function stopWebcam() {
+            if (webcamStream) {
+                webcamStream.getTracks().forEach(track => track.stop());
+                webcamStream = null;
+            }
+            if (analysisInterval) {
+                clearInterval(analysisInterval);
+                analysisInterval = null;
+            }
+        }
+
+        function captureWebcamPhoto() {
+            const video = document.getElementById('webcamVideo');
+            const canvas = document.getElementById('webcamCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Set canvas dimensions to match video
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            
+            // Draw the video frame to canvas
+            ctx.drawImage(video, 0, 0);
+            
+            // Stop webcam
+            stopWebcam();
+            
+            // Start analysis simulation
+            simulateAnalysis('webcam');
+        }
+
+        // Photo Upload Functions
+        document.getElementById('skinPhoto').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                // Check file size (10MB limit)
+                if (file.size > 10 * 1024 * 1024) {
+                    alert('File size too large. Please choose a file under 10MB.');
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.getElementById('photoPreview');
+                    const previewImage = document.getElementById('previewImage');
+                    previewImage.src = e.target.result;
+                    preview.classList.remove('hidden');
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        function analyzePhoto() {
+            const fileInput = document.getElementById('skinPhoto');
+            if (fileInput.files.length === 0) {
+                alert('Please select a photo first!');
+                return;
+            }
+            
+            simulateAnalysis('photo');
+        }
+
+        // Analysis Simulation
+        function simulateAnalysis(method) {
+            // Show loading overlay
+            const loadingOverlay = document.createElement('div');
+            loadingOverlay.className = 'fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center';
+            loadingOverlay.innerHTML = `
+                <div class="bg-white p-8 rounded-2xl max-w-md w-full mx-4 text-center">
+                    <div class="animate-spin rounded-full h-16 w-16 border-b-4 border-purple-600 mx-auto mb-6"></div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">Analyzing Your Skin</h3>
+                    <p id="analysisStep" class="text-gray-600 mb-4">Initializing AI models...</p>
+                    <div class="w-full bg-gray-200 rounded-full h-2">
+                        <div id="progressBar" class="bg-purple-600 h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(loadingOverlay);
+            
+            // Simulate analysis steps
+            const steps = [
+                { text: 'Detecting facial features...', progress: 20 },
+                { text: 'Analyzing skin texture and tone...', progress: 40 },
+                { text: 'Measuring hydration and oil levels...', progress: 60 },
+                { text: 'Identifying skin concerns...', progress: 80 },
+                { text: 'Generating personalized recommendations...', progress: 100 }
+            ];
+            
+            let currentStep = 0;
+            const stepInterval = setInterval(() => {
+                if (currentStep < steps.length) {
+                    document.getElementById('analysisStep').textContent = steps[currentStep].text;
+                    document.getElementById('progressBar').style.width = steps[currentStep].progress + '%';
+                    currentStep++;
+                } else {
+                    clearInterval(stepInterval);
+                    
+                    // Remove loading overlay
+                    document.body.removeChild(loadingOverlay);
+                    
+                    // Show results
+                    showAnalysisResults(method);
+                }
+            }, 2000);
+        }
+
+        function showAnalysisResults(method) {
+            const results = {
+                skinType: 'Combination',
+                concerns: ['Mild dehydration', 'Enlarged pores in T-zone', 'Uneven skin texture'],
+                hydration: '68%',
+                oiliness: 'Moderate (T-zone)',
+                sensitivity: 'Low',
+                skinAge: 'Early 20s',
+                overallScore: '7.2/10',
+                recommendations: [
+                    'Use gentle, hydrating cleanser twice daily',
+                    'Apply niacinamide serum for pore refinement',
+                    'Moisturize with lightweight, non-comedogenic formula',
+                    'Always use SPF 30+ during the day',
+                    'Consider weekly exfoliation with BHA'
+                ]
+            };
+            
+            // Create results modal
+            const resultsModal = document.createElement('div');
+            resultsModal.className = 'fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4';
+            resultsModal.innerHTML = `
+                <div class="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                    <div class="p-8">
+                        <div class="text-center mb-8">
+                            <div class="text-4xl mb-4">🎉</div>
+                            <h2 class="text-3xl font-bold text-gray-900 mb-2">Analysis Complete!</h2>
+                            <p class="text-gray-600">Here's your personalized skin assessment</p>
+                        </div>
+                        
+                        <div class="grid md:grid-cols-2 gap-6 mb-8">
+                            <div class="bg-gradient-to-br from-purple-50 to-blue-50 p-6 rounded-xl">
+                                <h3 class="font-bold text-gray-900 mb-4">Skin Profile</h3>
+                                <div class="space-y-2 text-sm">
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Skin Type:</span>
+                                        <span class="font-medium">${results.skinType}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Hydration:</span>
+                                        <span class="font-medium">${results.hydration}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Sensitivity:</span>
+                                        <span class="font-medium">${results.sensitivity}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Overall Score:</span>
+                                        <span class="font-bold text-purple-600">${results.overallScore}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-gradient-to-br from-green-50 to-teal-50 p-6 rounded-xl">
+                                <h3 class="font-bold text-gray-900 mb-4">Key Concerns</h3>
+                                <ul class="space-y-2 text-sm">
+                                    ${results.concerns.map(concern => `
+                                        <li class="flex items-start">
+                                            <span class="text-orange-500 mr-2 mt-1">•</span>
+                                            <span>${concern}</span>
+                                        </li>
+                                    `).join('')}
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-8">
+                            <h3 class="font-bold text-gray-900 mb-4">Personalized Recommendations</h3>
+                            <div class="bg-gray-50 p-6 rounded-xl">
+                                <ul class="space-y-3">
+                                    ${results.recommendations.map((rec, index) => `
+                                        <li class="flex items-start">
+                                            <span class="bg-purple-100 text-purple-600 rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold mr-3 mt-0.5">${index + 1}</span>
+                                            <span class="text-gray-700">${rec}</span>
+                                        </li>
+                                    `).join('')}
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="flex space-x-4">
+                            <button onclick="closeResultsModal()" class="flex-1 bg-gray-200 text-gray-800 py-3 rounded-full hover:bg-gray-300 transition duration-300">
+                                Close
+                            </button>
+                            <button onclick="createRoutine()" class="flex-1 bg-purple-600 text-white py-3 rounded-full hover:bg-purple-700 transition duration-300">
+                                Create My Routine
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(resultsModal);
+            
+            // Store results modal reference
+            window.currentResultsModal = resultsModal;
+        }
+
+        function closeResultsModal() {
+            if (window.currentResultsModal) {
+                document.body.removeChild(window.currentResultsModal);
+                window.currentResultsModal = null;
+            }
+        }
+
+        function createRoutine() {
+            closeResultsModal();
+            
+            // Create routine modal with detailed timetable
+            const routineModal = document.createElement('div');
+            routineModal.className = 'fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4';
+            routineModal.innerHTML = `
+                <div class="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+                    <div class="p-8">
+                        <div class="text-center mb-8">
+                            <div class="text-4xl mb-4">📅</div>
+                            <h2 class="text-3xl font-bold text-gray-900 mb-2">Your Personalized Skincare Routine</h2>
+                            <p class="text-gray-600">Based on your skin analysis - Combination skin with mild dehydration</p>
+                        </div>
+                        
+                        <div class="grid md:grid-cols-2 gap-8">
+                            <!-- Morning Routine -->
+                            <div class="bg-gradient-to-br from-yellow-50 to-orange-50 p-6 rounded-xl">
+                                <div class="flex items-center mb-4">
+                                    <div class="text-2xl mr-3">🌅</div>
+                                    <h3 class="text-xl font-bold text-gray-900">Morning Routine</h3>
+                                </div>
+                                
+                                <div class="routine-timeline">
+                                    <div class="timeline-item">
+                                        <div class="timeline-dot"></div>
+                                        <div>
+                                            <div class="font-semibold text-gray-900">7:00 AM - Gentle Cleanser</div>
+                                            <p class="text-sm text-gray-600 mt-1">CeraVe Foaming Facial Cleanser</p>
+                                            <p class="text-xs text-gray-500">Massage for 30 seconds, rinse with lukewarm water</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="timeline-item">
+                                        <div class="timeline-dot"></div>
+                                        <div>
+                                            <div class="font-semibold text-gray-900">7:05 AM - Vitamin C Serum</div>
+                                            <p class="text-sm text-gray-600 mt-1">The Ordinary Vitamin C Suspension 23%</p>
+                                            <p class="text-xs text-gray-500">3-4 drops, pat gently into skin</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="timeline-item">
+                                        <div class="timeline-dot"></div>
+                                        <div>
+                                            <div class="font-semibold text-gray-900">7:10 AM - Moisturizer</div>
+                                            <p class="text-sm text-gray-600 mt-1">Neutrogena Hydro Boost</p>
+                                            <p class="text-xs text-gray-500">Apply evenly, focus on dry areas</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="timeline-item">
+                                        <div class="timeline-dot"></div>
+                                        <div>
+                                            <div class="font-semibold text-gray-900">7:15 AM - Sunscreen</div>
+                                            <p class="text-sm text-gray-600 mt-1">EltaMD UV Clear (SPF 46)</p>
+                                            <p class="text-xs text-gray-500">Apply generously, reapply every 2 hours</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Evening Routine -->
+                            <div class="bg-gradient-to-br from-purple-50 to-blue-50 p-6 rounded-xl">
+                                <div class="flex items-center mb-4">
+                                    <div class="text-2xl mr-3">🌙</div>
+                                    <h3 class="text-xl font-bold text-gray-900">Evening Routine</h3>
+                                </div>
+                                
+                                <div class="routine-timeline">
+                                    <div class="timeline-item">
+                                        <div class="timeline-dot"></div>
+                                        <div>
+                                            <div class="font-semibold text-gray-900">9:00 PM - Double Cleanse</div>
+                                            <p class="text-sm text-gray-600 mt-1">Banila Co Clean It Zero + CeraVe Cleanser</p>
+                                            <p class="text-xs text-gray-500">Remove makeup first, then deep clean</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="timeline-item">
+                                        <div class="timeline-dot"></div>
+                                        <div>
+                                            <div class="font-semibold text-gray-900">9:10 PM - Treatment Serum</div>
+                                            <p class="text-sm text-gray-600 mt-1">The Ordinary Niacinamide 10%</p>
+                                            <p class="text-xs text-gray-500">2-3 drops, focus on T-zone for pore control</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="timeline-item">
+                                        <div class="timeline-dot"></div>
+                                        <div>
+                                            <div class="font-semibold text-gray-900">9:15 PM - Hydrating Serum</div>
+                                            <p class="text-sm text-gray-600 mt-1">The Ordinary Hyaluronic Acid 2%</p>
+                                            <p class="text-xs text-gray-500">Apply to damp skin for maximum hydration</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="timeline-item">
+                                        <div class="timeline-dot"></div>
+                                        <div>
+                                            <div class="font-semibold text-gray-900">9:20 PM - Night Moisturizer</div>
+                                            <p class="text-sm text-gray-600 mt-1">Olay Regenerist Night Recovery Cream</p>
+                                            <p class="text-xs text-gray-500">Rich formula for overnight repair</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Weekly Treatments -->
+                        <div class="mt-8 bg-gray-50 p-6 rounded-xl">
+                            <h3 class="text-lg font-bold text-gray-900 mb-4">📊 Weekly Treatments</h3>
+                            <div class="grid md:grid-cols-3 gap-4">
+                                <div class="text-center">
+                                    <div class="bg-green-100 p-3 rounded-lg mb-2">
+                                        <div class="text-2xl">🧴</div>
+                                    </div>
+                                    <h4 class="font-semibold">Monday & Thursday</h4>
+                                    <p class="text-sm text-gray-600">BHA Exfoliant (Paula's Choice 2%)</p>
+                                </div>
+                                <div class="text-center">
+                                    <div class="bg-blue-100 p-3 rounded-lg mb-2">
+                                        <div class="text-2xl">🥒</div>
+                                    </div>
+                                    <h4 class="font-semibold">Sunday</h4>
+                                    <p class="text-sm text-gray-600">Hydrating Face Mask (Sheet mask)</p>
+                                </div>
+                                <div class="text-center">
+                                    <div class="bg-purple-100 p-3 rounded-lg mb-2">
+                                        <div class="text-2xl">✨</div>
+                                    </div>
+                                    <h4 class="font-semibold">Wednesday</h4>
+                                    <p class="text-sm text-gray-600">Clay Mask for T-zone (Aztec Clay)</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Progress Tracking -->
+                        <div class="mt-8 bg-gradient-to-r from-purple-100 to-pink-100 p-6 rounded-xl">
+                            <h3 class="text-lg font-bold text-gray-900 mb-4">📈 Track Your Progress</h3>
+                            <div class="grid md:grid-cols-4 gap-4 text-center">
+                                <div>
+                                    <div class="text-2xl mb-2">📸</div>
+                                    <p class="text-sm font-medium">Weekly Photos</p>
+                                    <p class="text-xs text-gray-600">Same lighting & angle</p>
+                                </div>
+                                <div>
+                                    <div class="text-2xl mb-2">💧</div>
+                                    <p class="text-sm font-medium">Hydration Level</p>
+                                    <p class="text-xs text-gray-600">Target: 75%+</p>
+                                </div>
+                                <div>
+                                    <div class="text-2xl mb-2">🎯</div>
+                                    <p class="text-sm font-medium">Pore Appearance</p>
+                                    <p class="text-xs text-gray-600">Expect improvement in 4-6 weeks</p>
+                                </div>
+                                <div>
+                                    <div class="text-2xl mb-2">⭐</div>
+                                    <p class="text-sm font-medium">Overall Score</p>
+                                    <p class="text-xs text-gray-600">Current: 7.2/10</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Important Notes -->
+                        <div class="mt-8 bg-yellow-50 border border-yellow-200 p-4 rounded-xl">
+                            <h4 class="font-semibold text-yellow-800 mb-2">⚠️ Important Notes:</h4>
+                            <ul class="text-sm text-yellow-700 space-y-1">
+                                <li>• Introduce new products one at a time (1 week apart)</li>
+                                <li>• Always patch test new products on your inner arm first</li>
+                                <li>• Results typically visible after 4-6 weeks of consistent use</li>
+                                <li>• Adjust routine based on seasonal changes and skin response</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="flex space-x-4 mt-8">
+                            <button onclick="closeRoutineModal()" class="flex-1 bg-gray-200 text-gray-800 py-3 rounded-full hover:bg-gray-300 transition duration-300">
+                                Close
+                            </button>
+                            <button onclick="downloadRoutine()" class="flex-1 bg-purple-600 text-white py-3 rounded-full hover:bg-purple-700 transition duration-300">
+                                📱 Set Reminders
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(routineModal);
+            window.currentRoutineModal = routineModal;
+        }
+        
+        function closeRoutineModal() {
+            if (window.currentRoutineModal) {
+                document.body.removeChild(window.currentRoutineModal);
+                window.currentRoutineModal = null;
+            }
+        }
+        
+        function downloadRoutine() {
+            // Simulate setting up reminders
+            const successDiv = document.createElement('div');
+            successDiv.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
+            successDiv.innerHTML = `
+                <div class="flex items-center">
+                    <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                    </svg>
+                    <span>📱 Smart reminders activated! You'll get notifications for your routine.</span>
+                </div>
+            `;
+            document.body.appendChild(successDiv);
+            
+            setTimeout(() => {
+                document.body.removeChild(successDiv);
+            }, 5000);
+            
+            closeRoutineModal();
+        }
+
+        // Contact Form
+        function submitContactForm(event) {
+            event.preventDefault();
+            
+            // Show success message
+            const successDiv = document.createElement('div');
+            successDiv.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
+            successDiv.innerHTML = `
+                <div class="flex items-center">
+                    <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                    </svg>
+                    <span>Message sent successfully! We'll get back to you within 24 hours.</span>
+                </div>
+            `;
+            document.body.appendChild(successDiv);
+            
+            // Remove success message after 5 seconds
+            setTimeout(() => {
+                document.body.removeChild(successDiv);
+            }, 5000);
+            
+            // Reset form
+            event.target.reset();
+        }
+
+        // FAQ Function
+        function showFAQ() {
+            alert('FAQ section coming soon! For now, please use our chatbot or contact form for any questions.');
+        }
+
+        // Chatbot Functions
+        function toggleChatbot() {
+            const chatbot = document.getElementById('chatbot');
+            const toggle = document.getElementById('chatbotToggle');
+            
+            if (chatbot.classList.contains('hidden')) {
+                chatbot.classList.remove('hidden');
+                toggle.style.display = 'none';
+            } else {
+                chatbot.classList.add('hidden');
+                toggle.style.display = 'block';
+            }
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const messages = document.getElementById('chatMessages');
+            const message = input.value.trim();
+            
+            if (message === '') return;
+            
+            // Add user message
+            const userMsg = document.createElement('div');
+            userMsg.className = 'bg-purple-100 p-3 rounded-lg mb-3 ml-8';
+            userMsg.innerHTML = `<p class="text-sm">${message}</p>`;
+            messages.appendChild(userMsg);
+            
+            // Add bot response
+            setTimeout(() => {
+                const botMsg = document.createElement('div');
+                botMsg.className = 'bg-gray-100 p-3 rounded-lg mb-3';
+                
+                let response = getChatbotResponse(message, currentLanguage);
+                
+                botMsg.innerHTML = `<p class="text-sm">${response}</p>`;
+                messages.appendChild(botMsg);
+                messages.scrollTop = messages.scrollHeight;
+            }, 1000);
+            
+            input.value = '';
+            messages.scrollTop = messages.scrollHeight;
+        }
+
+        function getChatbotResponse(message, language) {
+            const lowerMessage = message.toLowerCase();
+            
+            const responses = {
+                en: {
+                    camera: 'To use our camera analysis, please click "Enable Camera Access" on the Analysis page. Your browser will ask for permission - just click "Allow". Your privacy is protected - images are processed locally and never stored.',
+                    routine: 'I recommend a gentle morning routine with cleanser, vitamin C serum, moisturizer, and SPF. For evening: cleanser, treatment serum, and night moisturizer. Would you like me to create a personalized routine based on your skin analysis?',
+                    product: 'Based on your skin analysis, I can suggest products tailored to your specific needs. Have you completed your skin analysis yet? If not, visit our Analysis page to get started!',
+                    acne: 'For acne-prone skin, I recommend salicylic acid cleanser, niacinamide serum, and non-comedogenic moisturizer. Always use SPF during the day. Avoid over-cleansing as it can worsen breakouts.',
+                    dry: 'For dry skin, focus on hydrating ingredients like hyaluronic acid, ceramides, and glycerin. Use a gentle cream cleanser and rich moisturizer. Consider adding a hydrating serum to your routine.',
+                    sensitive: 'For sensitive skin, choose fragrance-free, hypoallergenic products. Look for ingredients like niacinamide, ceramides, and avoid harsh actives initially. Always patch test new products.',
+                    default: 'I\'m here to help with all your skincare questions! You can ask about routines, products, ingredients, skin concerns, or how to use our analysis features. What would you like to know?'
+                },
+                hi: {
+                    camera: 'हमारे कैमरा विश्लेषण का उपयोग करने के लिए, कृपया विश्लेषण पृष्ठ पर "कैमरा एक्सेस सक्षम करें" पर क्लिक करें। आपका ब्राउज़र अनुमति मांगेगा - बस "अनुमति दें" पर क्लिक करें। आपकी गोपनीयता सुरक्षित है - छवियां स्थानीय रूप से संसाधित होती हैं और कभी संग्रहीत नहीं होतीं।',
+                    routine: 'मैं सुबह की दिनचर्या की सिफारिश करता हूं: क्लींजर, विटामिन सी सीरम, मॉइस्चराइज़र और एसपीएफ। शाम के लिए: क्लींजर, ट्रीटमेंट सीरम और नाइट मॉइस्चराइज़र। क्या आप चाहते हैं कि मैं आपके त्वचा विश्लेषण के आधार पर व्यक्तिगत दिनचर्या बनाऊं?',
+                    product: 'आपके त्वचा विश्लेषण के आधार पर, मैं आपकी विशिष्ट आवश्यकताओं के अनुकूल उत्पादों का सुझाव दे सकता हूं। क्या आपने अपना त्वचा विश्लेषण पूरा किया है? यदि नहीं, तो शुरू करने के लिए हमारे विश्लेषण पृष्ठ पर जाएं!',
+                    acne: 'मुंहासे-प्रवण त्वचा के लिए, मैं सैलिसिलिक एसिड क्लींजर, नियासिनामाइड सीरम और नॉन-कॉमेडोजेनिक मॉइस्चराइज़र की सिफारिश करता हूं। दिन में हमेशा एसपीएफ का उपयोग करें। अधिक सफाई से बचें क्योंकि यह मुंहासों को बदतर बना सकता है।',
+                    dry: 'शुष्क त्वचा के लिए, हायलूरोनिक एसिड, सेरामाइड्स और ग्लिसरीन जैसे हाइड्रेटिंग तत्वों पर ध्यान दें। एक कोमल क्रीम क्लींजर और समृद्ध मॉइस्चराइज़र का उपयोग करें। अपनी दिनचर्या में हाइड्रेटिंग सीरम जोड़ने पर विचार करें।',
+                    sensitive: 'संवेदनशील त्वचा के लिए, सुगंध-मुक्त, हाइपोएलर्जेनिक उत्पाद चुनें। नियासिनामाइड, सेरामाइड्स जैसे तत्वों की तलाश करें और शुरू में कठोर सक्रिय तत्वों से बचें। हमेशा नए उत्पादों का पैच टेस्ट करें।',
+                    default: 'मैं आपके सभी त्वचा देखभाल प्रश्नों में मदद के लिए यहां हूं! आप दिनचर्या, उत्पाद, सामग्री, त्वचा की चिंताओं या हमारी विश्लेषण सुविधाओं का उपयोग करने के बारे में पूछ सकते हैं। आप क्या जानना चाहते हैं?'
+                },
+                ta: {
+                    camera: 'எங்கள் கேமரா பகுப்பாய்வைப் பயன்படுத்த, பகுப்பாய்வு பக்கத்தில் "கேமரா அணுகலை இயக்கு" என்பதைக் கிளிக் செய்யவும். உங்கள் உலாவி அனுமதி கேட்கும் - "அனுமதி" என்பதைக் கிளிக் செய்யவும். உங்கள் தனியுரிமை பாதுகாக்கப்படுகிறது - படங்கள் உள்ளூரில் செயலாக்கப்பட்டு ஒருபோதும் சேமிக்கப்படுவதில்லை.',
+                    routine: 'நான் காலை வழக்கத்தை பரிந்துரைக்கிறேன்: க்ளென்சர், வைட்டமின் சி சீரம், மாய்ஸ்சரைசர் மற்றும் SPF. மாலைக்கு: க்ளென்சர், சிகிச்சை சீரம் மற்றும் இரவு மாய்ஸ்சரைசர். உங்கள் சரும பகுப்பாய்வின் அடிப்படையில் தனிப்பயனாக்கப்பட்ட வழக்கத்தை உருவாக்க வேண்டுமா?',
+                    product: 'உங்கள் சரும பகுப்பாய்வின் அடிப்படையில், உங்கள் குறிப்பிட்ட தேவைகளுக்கு ஏற்ற தயாரிப்புகளை நான் பரிந்துரைக்க முடியும். உங்கள் சரும பகுப்பாய்வை முடித்துவிட்டீர்களா? இல்லையென்றால், தொடங்க எங்கள் பகுப்பாய்வு பக்கத்தைப் பார்வையிடவும்!',
+                    acne: 'முகப்பரு-பாதிக்கப்பட்ட சருமத்திற்கு, நான் சாலிசிலிக் அமில க்ளென்சர், நியாசினமைடு சீரம் மற்றும் நான்-காமெடோஜெனிக் மாய்ஸ்சரைசரை பரிந்துரைக்கிறேன். பகலில் எப்போதும் SPF பயன்படுத்தவும். அதிக சுத்தம் செய்வதைத் தவிர்க்கவும் ஏனெனில் இது முகப்பருவை மோசமாக்கலாம்.',
+                    dry: 'வறண்ட சருமத்திற்கு, ஹைலூரோனிக் அமிலம், செராமைடுகள் மற்றும் கிளிசரின் போன்ற ஈரப்பதமூட்டும் பொருட்களில் கவனம் செலுத்துங்கள். மென்மையான க்ரீம் க்ளென்சர் மற்றும் வளமான மாய்ஸ்சரைசரைப் பயன்படுத்தவும். உங்கள் வழக்கத்தில் ஈரப்பதமூட்டும் சீரம் சேர்க்கவும்.',
+                    sensitive: 'உணர்திறன் சருமத்திற்கு, நறுமணம் இல்லாத, ஹைபோஅலர்ஜெனிக் தயாரிப்புகளைத் தேர்ந்தெடுக்கவும். நியாசினமைடு, செராமைடுகள் போன்ற பொருட்களைத் தேடுங்கள் மற்றும் ஆரம்பத்தில் கடுமையான செயலில் உள்ள பொருட்களைத் தவிர்க்கவும். எப்போதும் புதிய தயாரிப்புகளை பேட்ச் டெஸ்ட் செய்யுங்கள்.',
+                    default: 'உங்கள் அனைத்து சரும பராமரிப்பு கேள்விகளுக்கும் உதவ நான் இங்கே இருக்கிறேன்! நீங்கள் வழக்கங்கள், தயாரிப்புகள், பொருட்கள், சரும கவலைகள் அல்லது எங்கள் பகுப்பாய்வு அம்சங்களை எவ்வாறு பயன்படுத்துவது என்பது பற்றி கேட்கலாம். நீங்கள் என்ன தெரிந்து கொள்ள விரும்புகிறீர்கள்?'
+                },
+                te: {
+                    camera: 'మా కెమెరా విశ్లేషణను ఉపయోగించడానికి, దయచేసి విశ్లేషణ పేజీలో "కెమెరా యాక్సెస్ ఎనేబుల్ చేయండి"పై క్లిక్ చేయండి. మీ బ్రౌజర్ అనుమతి అడుగుతుంది - కేవలం "అనుమతించు"పై క్లిక్ చేయండి. మీ గోప్యత రక్షించబడుతుంది - చిత్రాలు స్థానికంగా ప్రాసెస్ చేయబడతాయి మరియు ఎప్పుడూ నిల్వ చేయబడవు.',
+                    routine: 'నేను మార్నింగ్ రొటీన్‌ను సిఫార్సు చేస్తున్నాను: క్లెన్సర్, విటమిన్ సి సీరం, మాయిశ్చరైజర్ మరియు SPF. సాయంత్రం కోసం: క్లెన్సర్, ట్రీట్‌మెంట్ సీరం మరియు నైట్ మాయిశ్చరైజర్. మీ స్కిన్ అనాలిసిస్ ఆధారంగా వ్యక్తిగతీకరించిన రొటీన్ సృష్టించాలని అనుకుంటున్నారా?',
+                    product: 'మీ స్కిన్ అనాలిసిస్ ఆధారంగా, మీ నిర్దిష్ట అవసరాలకు అనుకూలమైన ఉత్పత్తులను నేను సూచించగలను. మీరు మీ స్కిన్ అనాలిసిస్ పూర్తి చేశారా? లేకపోతే, ప్రారంభించడానికి మా అనాలిసిస్ పేజీని సందర్శించండి!',
+                    acne: 'మొటిమల-ప్రవణ చర్మం కోసం, నేను సాలిసిలిక్ యాసిడ్ క్లెన్సర్, నియాసినమైడ్ సీరం మరియు నాన్-కామెడోజెనిక్ మాయిశ్చరైజర్‌ను సిఫార్సు చేస్తున్నాను. పగటిపూట ఎల్లప్పుడూ SPF ఉపయోగించండి. అధిక శుభ్రపరచడం మొటిమలను మరింత దిగజార్చవచ్చు కాబట్టి దానిని నివారించండి.',
+                    dry: 'పొడి చర్మం కోసం, హైలురోనిక్ యాసిడ్, సెరామైడ్స్ మరియు గ్లిసరిన్ వంటి హైడ్రేటింగ్ పదార్థాలపై దృష్టి పెట్టండి. సున్నితమైన క్రీమ్ క్లెన్సర్ మరియు రిచ్ మాయిశ్చరైజర్ ఉపయోగించండి. మీ రొటీన్‌లో హైడ్రేటింగ్ సీరం జోడించడాన్ని పరిగణించండి.',
+                    sensitive: 'సెన్సిటివ్ స్కిన్ కోసం, సువాసన లేని, హైపోఅలర్జెనిక్ ఉత్పత్తులను ఎంచుకోండి. నియాసినమైడ్, సెరామైడ్స్ వంటి పదార్థాలను వెతకండి మరియు మొదట్లో కఠినమైన యాక్టివ్‌లను నివారించండి. ఎల్లప్పుడూ కొత్త ఉత్పత్తులను ప్యాచ్ టెస్ట్ చేయండి.',
+                    default: 'మీ అన్ని స్కిన్‌కేర్ ప్రశ్నలతో సహాయం చేయడానికి నేను ఇక్కడ ఉన్నాను! మీరు రొటీన్‌లు, ఉత్పత్తులు, పదార్థాలు, స్కిన్ కన్సర్న్‌లు లేదా మా అనాలిసిస్ ఫీచర్‌లను ఎలా ఉపయోగించాలి అనే దాని గురించి అడగవచ్చు. మీరు ఏమి తెలుసుకోవాలనుకుంటున్నారు?'
+                }
+            };
+            
+            // Add other languages with default English responses
+            const langResponses = responses[language] || responses.en;
+            
+            if (lowerMessage.includes('camera') || lowerMessage.includes('permission') || 
+                lowerMessage.includes('कैमरा') || lowerMessage.includes('கேமரா') || lowerMessage.includes('కెమెరా')) {
+                return langResponses.camera;
+            } else if (lowerMessage.includes('routine') || lowerMessage.includes('दिनचर्या') || 
+                      lowerMessage.includes('வழக்கம்') || lowerMessage.includes('రొటీన్')) {
+                return langResponses.routine;
+            } else if (lowerMessage.includes('product') || lowerMessage.includes('उत्पाद') || 
+                      lowerMessage.includes('தயாரிப்பு') || lowerMessage.includes('ఉత్పత్తి')) {
+                return langResponses.product;
+            } else if (lowerMessage.includes('acne') || lowerMessage.includes('breakout') || 
+                      lowerMessage.includes('मुंहासे') || lowerMessage.includes('முகப்பரு') || lowerMessage.includes('మొటిమలు')) {
+                return langResponses.acne;
+            } else if (lowerMessage.includes('dry') || lowerMessage.includes('hydration') || 
+                      lowerMessage.includes('शुष्क') || lowerMessage.includes('வறண்ட') || lowerMessage.includes('పొడి')) {
+                return langResponses.dry;
+            } else if (lowerMessage.includes('sensitive') || lowerMessage.includes('संवेदनशील') || 
+                      lowerMessage.includes('உணர்திறன்') || lowerMessage.includes('సెన్సిటివ్')) {
+                return langResponses.sensitive;
+            } else {
+                return langResponses.default;
+            }
+        }
+
+        // Enter key for chat
+        document.getElementById('chatInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+
+
+        // Initialize the website properly
+        window.addEventListener('DOMContentLoaded', function() {
+            // Set initial active nav link
+            const homeLink = document.querySelector('[onclick="showPage(\'home\')"]');
+            if (homeLink) {
+                homeLink.classList.add('active');
+            }
+            
+            // Show home page by default
+            showPage('home');
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'988afc45f0a985b4',t:'MTc1OTQ3OTI2MS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
